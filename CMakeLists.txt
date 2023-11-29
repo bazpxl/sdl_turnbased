@@ -195,7 +195,7 @@ add_executable( sdl_basegame
         src/tilefont.h
         src/tiles.h
         src/collider.h
-        src/example/mapeditor.cpp src/player.cpp src/player.h src/player.h)
+        src/example/mapeditor.cpp src/player.cpp src/player.h)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")
