@@ -1,5 +1,6 @@
 #pragma once
 
+
 #define _GLIBC_USE_DEPRECATED 0
 #define _GLIBCXX_USE_DEPRECATED 0
 #define _LIBCPP_ENABLE_DEPRECATION_WARNINGS 2
@@ -122,7 +123,7 @@ using fmt::print, fmt::println, fmt::format;
 #ifdef FINAL
 #define BasePath ""             // Put the binaries in the root folder, parallel to assets/
 #else
-#define BasePath "../../../../"    //    out/build/${architecture}-${configuration}
+#define BasePath "../../"    //    out/build/${architecture}-${configuration}
                                 // OR build/${configuration}-${compiler}/bin
 #endif
 

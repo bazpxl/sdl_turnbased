@@ -1,6 +1,11 @@
 cmake_minimum_required( VERSION 3.20 )
 project( sdl_basegame )
 
+if (APPLE)
+    set( VCPKG_TARGET_TRIPLET "arm64-osx" )
+endif ()
+
+
 set( CMAKE_C_STANDARD   17 )
 set( CMAKE_CXX_STANDARD 20 )
 
@@ -182,20 +187,11 @@ add_executable( sdl_basegame
         src/recthelper.h
         src/autocast_ptr.cpp
 
-        src/example/pongmain.cpp
-
-        src/example/main.cpp
-        src/example/examplegame.h
-        src/example/examplegame.cpp
-        src/example/camerastate.cpp
-        src/example/introstate.cpp
-        src/example/plasmastate.cpp
-        src/example/shooterstate.cpp
-        src/example/sortstate.cpp
-        src/tilefont.h
-        src/tiles.h
-        src/collider.h
-        src/example/mapeditor.cpp src/player.cpp src/player.h)
+        src/States/main.cpp
+        src/States/examplegame.h
+        src/States/examplegame.cpp
+        src/Units/Unit.cpp
+        src/Units/Unit.h src/States/warstate.cpp)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")
