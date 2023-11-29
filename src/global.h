@@ -113,19 +113,25 @@ using std::print, std::println, std::format;
 using fmt::print, fmt::println, fmt::format;
 #endif
 
-// _MSC_VER is also true for Clang on Windows, which is fine, but we might need a branch for CLion vs Visual Studio
-#ifdef _MSC_VER
-//#define BasePath "../../../"    // out/build/${architecture}-${configuration}
+#ifdef FINAL
+#define BasePath ""             // Für die finale Version
 #else
-//#define BasePath "../"          // cmake-build-${configuration}
+#ifdef _MSC_VER
+// Definitionen spezifisch für Microsoft Visual C++
+#define BasePath "../../../../"    // out/build/${architecture}-${configuration}
+#elif __APPLE__
+// Definitionen spezifisch für Apple-Systeme
+#define BasePath "../../"          // Pfad für Apple-Geräte
+#else
+// Definitionen für andere Compiler und Systeme
+#define BasePath "../../../../"    // Standard-Definition für andere Systeme
+#endif
 #endif
 
-#ifdef FINAL
-#define BasePath ""             // Put the binaries in the root folder, parallel to assets/
-#else
-#define BasePath "../../"    //    out/build/${architecture}-${configuration}
-                                // OR build/${configuration}-${compiler}/bin
-#endif
+
+
+
+
 
 #if defined( _DEBUG )
 #define DebugOnly( ... ) __VA_ARGS__
