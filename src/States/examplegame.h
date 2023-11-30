@@ -3,8 +3,9 @@
 #include <global.h>
 
 #include <gamebase.h>
-#include <recthelper.h>
-#include <autocast_ptr.h>
+#include "Helper/recthelper.h"
+#include "Helper/autocast_ptr.h"
+#include "Helper/render_singleton.h"
 
 class ExampleGame;
 class WarState;

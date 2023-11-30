@@ -96,7 +96,7 @@ template<class T, class D = std::default_delete<T>> using UniquePtr = std::uniqu
 template<class T>                                   using SharedPtr = autocast_shared_ptr<T>;
 template<class T>                                   using WeakPtr   = std::weak_ptr<T>;
 
-#include <autocast_ptr.h>
+#include "Helper/autocast_ptr.h"
 
 
 using Clock     = std::chrono::high_resolution_clock;

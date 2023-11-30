@@ -184,14 +184,14 @@ add_executable( sdl_basegame
         src/global.h
         src/gamebase.h
         src/gamebase.cpp
-        src/recthelper.h
-        src/autocast_ptr.cpp
+        src/Helper/recthelper.h
+        src/Helper/autocast_ptr.cpp
 
         src/States/main.cpp
         src/States/examplegame.h
         src/States/examplegame.cpp
         src/Units/Unit.cpp
-        src/Units/Unit.h src/States/warstate.cpp)
+        src/Units/Unit.h src/States/warstate.cpp src/Helper/render_singleton.cpp src/Helper/render_singleton.h)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")
