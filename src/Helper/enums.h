@@ -39,6 +39,7 @@ enum class TileType {
     FOREST,
     MOUNTAIN,
     RIVER,
+    BRIDGE,
     LANDBRIDGE,
     SEABRIDGE,
     BEACH,
@@ -47,6 +48,7 @@ enum class TileType {
     FACTORY,
     AIRPORT,
     PORT,
-    HQ
+    HQ,
+    UNKNOWN
 };
 #endif //SDL_BASEGAME_ENUMS_H

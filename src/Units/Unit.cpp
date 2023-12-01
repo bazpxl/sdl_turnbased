@@ -5,8 +5,7 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
            int maxFuel, int ammo, int price) :
         _type(type),
         _movementType(movementType),
-        _x(x),
-        _y(y),
+        _coordinates({x, y}),
         _startX(startX),
         _startY(startY),
         _team(team),
@@ -27,8 +26,8 @@ void Unit::draw(SDL_Texture *t) {
             16
     };
     SDL_Rect destRect = {
-            _x * 32,
-            _y * 32,
+            _coordinates.x * 32,
+            _coordinates.y * 32,
             32,
             32
     };
@@ -42,14 +41,6 @@ UnitType Unit::getType() const {
 
 MovementType Unit::getMovementType() const {
     return _movementType;
-}
-
-int Unit::getX() const {
-    return _x;
-}
-
-int Unit::getY() const {
-    return _y;
 }
 
 int Unit::getHp() const {
@@ -92,13 +83,7 @@ bool Unit::isFinishedTurn() const {
     return _finishedTurn;
 }
 
-void Unit::setX(int x) {
-    _x = x;
-}
 
-void Unit::setY(int y) {
-    _y = y;
-}
 
 void Unit::setFuel(int fuel) {
     _fuel = fuel;
@@ -126,6 +111,15 @@ void Unit::setFinishedTurn(bool finishedTurn) {
 
 void Unit::setDirection(SDL_RendererFlip direction) {
     _direction = direction;
+}
+
+SDL_Point Unit::getCoordinates() const {
+    return _coordinates;
+}
+
+void Unit::setCoordinates(int x, int y) {
+    _coordinates.x = x;
+    _coordinates.y = y;
 }
 
 Infantry::Infantry(int x, int y, int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,

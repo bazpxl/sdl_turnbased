@@ -6,17 +6,21 @@
 
 class MapStats {
 public:
-    static MapStats &getInstance();
+    static MapStats &getInstance(std::vector<std::vector<std::vector<int>>> *map);
 
-    int getMovementCost(TileType tileType, MovementType movementType);
+    [[nodiscard]] TileType getTileType(int x, int y) const;
 
-    int getDefense(TileType tileType);
+    [[nodiscard]] int getMovementCost(int x, int y, MovementType movementType) const;
+
+    [[nodiscard]] int getDefense(int x, int y) const;
 
 private:
-    MapStats();
+    explicit MapStats(std::vector<std::vector<std::vector<int>>> *map);
 
-    std::map<TileType, std::map<MovementType, int>> _movementCosts;
-    std::map<TileType, int> _defense;
+    std::vector<std::vector<std::vector<int>>> *_map;
+    std::unordered_map<TileType, std::map<MovementType, int>> _movementCosts;
+    std::unordered_map<TileType, int> _defense;
+    std::unordered_map<int, TileType> _indexTileTypeMapping;
 };
 
 

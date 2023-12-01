@@ -10,7 +10,7 @@ class Unit {
 protected:
     const UnitType _type;
     const MovementType _movementType;
-    int _x, _y;
+    SDL_Point _coordinates; // Index Position
     int _startX, _startY;
     int _team;
     SDL_RendererFlip _direction = SDL_FLIP_NONE;
@@ -46,6 +46,8 @@ public:
 
     [[nodiscard]] MovementType getMovementType() const;
 
+    [[nodiscard]] SDL_Point getCoordinates() const;
+
     [[nodiscard]] int getX() const;
 
     [[nodiscard]] int getY() const;
@@ -70,9 +72,7 @@ public:
 
     [[nodiscard]] bool isFinishedTurn() const;
 
-    void setX(int x);
-
-    void setY(int y);
+    void setCoordinates(int x, int y);
 
     void setFuel(int fuel);
 
