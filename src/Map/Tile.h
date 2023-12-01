@@ -7,15 +7,17 @@
 
 
 class Tile {
+public:
+    explicit Tile(TileType type) : _type(type) {}
+
+    [[nodiscard]] TileType getType() const {
+        return _type;
+    }
+
 private:
     const TileType _type;
-    //const int _x, _y;
-
-
-public:
-    Tile(TileType type);
-    int getMovementCost(UnitType unitType);
 };
+
 
 
 #endif //SDL_BASEGAME_TILE_H
