@@ -1,40 +1,10 @@
 #ifndef SDL_BASEGAME_UNIT_H
 #define SDL_BASEGAME_UNIT_H
 
-#include "../global.h"
-#include "../Helper/render_singleton.h"
+#include "global.h"
+#include "Helper/render_singleton.h"
+#include "Helper/enums.h"
 
-enum class MovementType {
-    INFANTRY,
-    MECH,
-    TIRE_A,
-    TIRE_B,
-    TREAD,
-    AIR,
-    SEA,
-    TRANSPORT_BOAT
-};
-
-enum class UnitType {
-    INFANTRY,
-    MECH,
-    RECON,
-    TANK,
-    MEDIUM_TANK,
-    APC,
-    ARTILLERY,
-    ROCKETS,
-    ANTI_AIR,
-    MISSILES,
-    B_COPTER,
-    T_COPTER,
-    FIGHTER,
-    BOMBER,
-    BATTLESHIP,
-    CRUISER,
-    LANDER,
-    SUBMARINE
-};
 
 class Unit {
 protected:

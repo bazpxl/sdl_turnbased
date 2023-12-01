@@ -8,6 +8,8 @@ SDL_Texture * texture;
 std::vector<std::vector<std::vector<int>>> Map;
 #define BasePath "../../"
 
+std::unique_ptr<Unit> infantryUnit;
+
 void drawTile(SDL_Renderer* renderer, SDL_Texture* tilesetTexture, int tileIndex, int tileSize, int tilesPerRow, SDL_Rect& destRect) {
     SDL_Rect srcRect;
     srcRect.w = srcRect.h = tileSize;
@@ -53,6 +55,7 @@ void WarState::Init() {
     Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
     Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
 
+    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY,3,4,3);
 }
 
 void WarState::UnInit() {
@@ -77,9 +80,6 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
             }
         }
     }
-    auto inf = UnitFactory::createUnit(UnitType::INFANTRY, 1, 2, 0);
-    std::unique_ptr<Unit> infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY,3,4,3);
     infantryUnit->draw(texture);
-    inf->draw(texture);
 }
 
