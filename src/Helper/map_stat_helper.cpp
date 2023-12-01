@@ -278,7 +278,12 @@ MapStats &MapStats::getInstance(std::vector<std::vector<std::vector<int>>> *map)
 }
 
 TileType MapStats::getTileType(int x, int y) const {
-    if (y < 0 || y >= int(_map[0].size()) || x < 0 || x >= int(_map[0][y].size())) {
+
+    if (y < 0 || y >= int((*_map)[0].size())) {
+        return TileType::UNKNOWN;
+    }
+
+    if (x < 0 || x >= int((*_map)[0][y].size())) {
         return TileType::UNKNOWN;
     }
 

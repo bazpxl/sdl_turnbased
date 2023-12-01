@@ -93,7 +93,7 @@ void WarState::Init() {
     Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
     Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 0, 2, 3);
+    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 0, 7, 3);
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 12);
 
 }
@@ -123,8 +123,8 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
     //renderTileset(renderer, texture, indexFont);
     infantryUnit->draw(texture);
     SDL_Point p = infantryUnit->getCoordinates();
-    //int cost = MapStats::getInstance(&Map).getMovementCost(p.x, p.y,infantryUnit->getMovementType());
-    //int defense = MapStats::getInstance(&Map).getDefense(p.x, p.y);
-    //std::cout << "Cost: " << cost << " Defense: " << defense << std::endl;
+    int cost = MapStats::getInstance(&Map).getMovementCost(p.x, p.y,infantryUnit->getMovementType());
+    int defense = MapStats::getInstance(&Map).getDefense(p.x, p.y);
+    std::cout << "Cost: " << cost << " Defense: " << defense << std::endl;
 }
 
