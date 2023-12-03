@@ -4,6 +4,7 @@
 #include "Units/Unit.h"
 #include "Helper/map_stat_helper.h"
 #include "examplegame.h"
+#include "Map/Dijkstra.h"
 
 SDL_Texture *texture;
 std::vector<std::vector<std::vector<int>>> Map;
@@ -33,28 +34,22 @@ void renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset,TTF_Font *font, 
 
     for (int y = 0; y < tilesPerColumn; ++y) {
         for (int x = 0; x < tilesPerRow; ++x) {
-            // Setze die Quell-Rechteck-Koordinaten
             srcRect.x = x * tileSize;
             srcRect.y = y * tileSize;
 
-            // Setze die Ziel-Rechteck-Koordinaten
             destRect.x = x * tileSize * 2;
             destRect.y = y * tileSize * 2;
 
-            // Zeichne das Tile
             SDL_RenderCopy(renderer, tileset, &srcRect, &destRect);
 
-            // Text zum Rendern des Indexes
             int index = y * tilesPerRow + x;
             std::string indexText = std::to_string(index);
-            SDL_Surface *textSurface = TTF_RenderText_Solid(font, indexText.c_str(), {255, 255, 255}); // Weißer Text
+            SDL_Surface *textSurface = TTF_RenderText_Solid(font, indexText.c_str(), {255, 255, 255,255});
             SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
-            // Zeichne den Text auf das Tile
             SDL_Rect textRect = {destRect.x, destRect.y, textSurface->w, textSurface->h};
-            SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+            SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
 
-            // Räume auf
             SDL_FreeSurface(textSurface);
             SDL_DestroyTexture(textTexture);
         }
@@ -84,16 +79,19 @@ std::vector<std::vector<int>> csvToMap(const string &filename) {
 
 void WarState::Init() {
     RS::getInstance().init(renderer);
+    Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
+    Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
+
+    //PathFinder pathFinder(Map, MapStats::getInstance(&Map));
 
     texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tileset.png");
     if (!texture) {
         std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
 
-    Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
-    Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 0, 7, 3);
+
+    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 7, 9, 3);
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 12);
 
 }
@@ -120,11 +118,11 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
             }
         }
     }
-    //renderTileset(renderer, texture, indexFont);
     infantryUnit->draw(texture);
     SDL_Point p = infantryUnit->getCoordinates();
-    int cost = MapStats::getInstance(&Map).getMovementCost(p.x, p.y,infantryUnit->getMovementType());
-    int defense = MapStats::getInstance(&Map).getDefense(p.x, p.y);
-    std::cout << "Cost: " << cost << " Defense: " << defense << std::endl;
+    renderTileset(renderer, texture, indexFont);
+    //int cost = MapStats::getInstance(&Map).getMovementCost(p.x, p.y,infantryUnit->getMovementType());
+    //int defense = MapStats::getInstance(&Map).getDefense(p.x, p.y);
+    //std::cout << "Cost: " << cost << " Defense: " << defense << std::endl;
 }
 

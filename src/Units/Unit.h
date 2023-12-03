@@ -48,10 +48,6 @@ public:
 
     [[nodiscard]] SDL_Point getCoordinates() const;
 
-    [[nodiscard]] int getX() const;
-
-    [[nodiscard]] int getY() const;
-
     [[nodiscard]] int getHp() const;
 
     [[nodiscard]] int getMaxHp() const;
