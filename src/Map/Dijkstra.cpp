@@ -83,7 +83,7 @@ std::vector<PathFinder::Node> PathFinder::getNeighbors(PathFinder::Node *node, s
 }
 
 std::unordered_set<SDL_Point, PathFinder::PointHash, PathFinder::PointEqual>
-PathFinder::extractPoints(const std::unordered_map<SDL_Point, Node, PointHash> &nodes) {
+PathFinder::extractPoints(const std::unordered_map<SDL_Point, Node, PointHash,PointEqual> &nodes) {
     std::unordered_set<SDL_Point, PointHash, PointEqual> points;
     for (const auto &node: nodes) {
         SDL_Point p = node.second._point;
@@ -101,12 +101,13 @@ PathFinder::calculateMoveRadius(SDL_Point start, int movePoints, MovementType mo
         return extractPoints(cached->second);
     }
 
-    std::unordered_map<SDL_Point, Node, PointHash> nodes;
+    std::unordered_map<SDL_Point, Node, PointHash, PointEqual> nodes = {
+            {{start},Node(start, 0, start, 0)}
+    };
     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> queue;
     std::vector<std::vector<int>> weightedGraph = convertToWeightedGraph(movementType);
 
     queue.emplace(start, 0, start, 0);
-    nodes[start] = Node(start, 0, start, 0);
 
     while (!queue.empty()) {
         Node currentNode = queue.top();
@@ -120,7 +121,7 @@ PathFinder::calculateMoveRadius(SDL_Point start, int movePoints, MovementType mo
         }
     }
 
-    _nodeCache[key] = nodes;
+    _nodeCache[key]=nodes;
 
     return extractPoints(nodes);
 }
