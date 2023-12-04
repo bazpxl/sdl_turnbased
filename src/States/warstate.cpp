@@ -90,7 +90,7 @@ void WarState::Init() {
     if (!texture) {
         std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
-
+    Unit::setTexture(texture);
 
     infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 7, 9, 3);
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 12);
@@ -135,6 +135,6 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
         SDL_RenderFillRect(renderer, &destRect);
     }
-    infantryUnit->draw(texture);
+    infantryUnit->draw();
 }
 

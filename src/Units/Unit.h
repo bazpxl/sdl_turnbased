@@ -8,6 +8,7 @@
 
 class Unit {
 protected:
+    static SDL_Texture * _texture;
     const UnitType _type;
     const MovementType _movementType;
     SDL_Point _coordinates; // Index Position
@@ -37,7 +38,9 @@ public:
 
     virtual ~Unit() = default;
 
-    virtual void draw(Texture *texture);
+    virtual void draw();
+
+    static void setTexture(SDL_Texture *texture);
 
     // TODO: Implement specialMove
     //virtual void specialMove() = 0;

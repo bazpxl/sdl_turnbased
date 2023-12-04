@@ -18,7 +18,7 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
     _renderer = RS::getInstance().get();
 }
 
-void Unit::draw(SDL_Texture *t) {
+void Unit::draw() {
     SDL_Rect sourceRect = {
             _startX,
             _startY + _team * 16,
@@ -32,7 +32,7 @@ void Unit::draw(SDL_Texture *t) {
             32
     };
 
-    SDL_RenderCopyEx(_renderer, t, &sourceRect, &destRect, 0, nullptr, _direction);
+    SDL_RenderCopyEx(_renderer, _texture, &sourceRect, &destRect, 0, nullptr, _direction);
 }
 
 UnitType Unit::getType() const {
@@ -120,6 +120,12 @@ SDL_Point Unit::getCoordinates() const {
 void Unit::setCoordinates(int x, int y) {
     _coordinates.x = x;
     _coordinates.y = y;
+}
+
+SDL_Texture *Unit::_texture = nullptr;
+
+void Unit::setTexture(SDL_Texture *texture) {
+    _texture = texture;
 }
 
 Infantry::Infantry(int x, int y, int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,
