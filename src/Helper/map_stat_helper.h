@@ -3,6 +3,8 @@
 
 #include <map>
 #include "enums.h"
+#include <vector>
+#include <unordered_map>
 
 class MapStats {
 public:

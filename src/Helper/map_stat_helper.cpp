@@ -1,3 +1,4 @@
+#include <limits>
 #include "map_stat_helper.h"
 
 MapStats::MapStats(std::vector<std::vector<std::vector<int>>>* map) : _map(map) {

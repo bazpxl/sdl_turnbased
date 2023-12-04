@@ -12,6 +12,10 @@ class PathFinder {
 public:
     class Node {
     public:
+        Node() {
+
+        }
+
         SDL_Point _point;
         int _cost;
         SDL_Point _parent;
@@ -19,7 +23,8 @@ public:
 
         Node(SDL_Point point, int cost, SDL_Point parent, int totalCost) : _point(point), _cost(cost), _parent(parent),
                                                                            _totalCost(totalCost) {}
-
+        Node(Node const &node): _point(node._point), _cost(node._cost), _parent(node._parent),
+                         _totalCost(node._totalCost) {}
         bool operator>(const Node &other) const { return _totalCost > other._totalCost; }
 
     };
@@ -46,9 +51,8 @@ public:
 
     struct PointHash {
         std::size_t operator()(const SDL_Point& point) const {
-            std::size_t h1 = std::hash<int>()(point.x);
-            std::size_t h2 = std::hash<int>()(point.y);
-            return h1 ^ (h2 << 1);
+            return std::hash<int>()(point.x) ^
+                    (std::hash<int>()(point.y) << 1);
         }
     };
     struct PointEqual {
@@ -72,9 +76,9 @@ private:
 
     std::unordered_map<MovementType, std::vector<std::vector<int>>> _movementCostsTypeMapping; // initialized in constructor
 
-    std::unordered_map<MoveRadiusCacheKey, std::unordered_map<SDL_Point, Node, PointHash>, MoveRadiusCacheKeyHash> _nodeCache;
+    std::unordered_map<MoveRadiusCacheKey, std::unordered_map<SDL_Point, Node, PointHash, PointEqual>, MoveRadiusCacheKeyHash> _nodeCache;
 
-    static std::unordered_set<SDL_Point, PathFinder::PointHash, PathFinder::PointEqual> extractPoints(const std::unordered_map<SDL_Point, Node, PointHash>& nodes);
+    static std::unordered_set<SDL_Point, PathFinder::PointHash, PathFinder::PointEqual> extractPoints(const std::unordered_map<SDL_Point, Node, PointHash, PointEqual>& nodes);
 
     [[nodiscard]] const std::vector<std::vector<int>> *getWeightedGraph(MovementType movementType) const;
 
