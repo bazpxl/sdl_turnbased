@@ -9,7 +9,7 @@
 SDL_Texture *texture;
 std::vector<std::vector<std::vector<int>>> Map;
 #define BasePath "../../"
-TTF_Font* indexFont;
+TTF_Font *indexFont;
 
 
 std::unique_ptr<Unit> infantryUnit;
@@ -26,7 +26,9 @@ void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex
     SDL_RenderCopy(renderer, tilesetTexture, &srcRect, &destRect);
 }
 
-void renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset,TTF_Font *font, int tileSize = 16, int tilesPerRow = 18, int tilesPerColumn = 11) {
+void
+renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, int tileSize = 16, int tilesPerRow = 18,
+              int tilesPerColumn = 11) {
     SDL_Rect srcRect;
     SDL_Rect destRect;
     srcRect.w = srcRect.h = tileSize;
@@ -44,7 +46,7 @@ void renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset,TTF_Font *font, 
 
             int index = y * tilesPerRow + x;
             std::string indexText = std::to_string(index);
-            SDL_Surface *textSurface = TTF_RenderText_Solid(font, indexText.c_str(), {255, 255, 255,255});
+            SDL_Surface *textSurface = TTF_RenderText_Solid(font, indexText.c_str(), {255, 255, 255, 255});
             SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
             SDL_Rect textRect = {destRect.x, destRect.y, textSurface->w, textSurface->h};
@@ -82,7 +84,7 @@ void WarState::Init() {
     Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
     Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
 
-    //PathFinder pathFinder(Map, MapStats::getInstance(&Map));
+    pathFinder = new PathFinder(Map, MapStats::getInstance(&Map));
 
     texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tileset.png");
     if (!texture) {
@@ -90,10 +92,8 @@ void WarState::Init() {
     }
 
 
-
     infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 7, 9, 3);
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 12);
-
 }
 
 void WarState::UnInit() {
@@ -118,11 +118,23 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
             }
         }
     }
+
+    auto path = pathFinder->calculateMoveRadius({7, 9}, 3, MovementType::INFANTRY);
+
+    for (auto &point: path) {
+        destRect.x = point.x * 32;
+        destRect.y = point.y * 32;
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderDrawRect(renderer, &destRect);
+    }
+
+    auto spath = pathFinder->findShortestPath({7, 9}, {5, 10}, 3, MovementType::INFANTRY);
+    for (auto &point: spath) {
+        destRect.x = point.x * 32;
+        destRect.y = point.y * 32;
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_RenderFillRect(renderer, &destRect);
+    }
     infantryUnit->draw(texture);
-    SDL_Point p = infantryUnit->getCoordinates();
-    renderTileset(renderer, texture, indexFont);
-    //int cost = MapStats::getInstance(&Map).getMovementCost(p.x, p.y,infantryUnit->getMovementType());
-    //int defense = MapStats::getInstance(&Map).getDefense(p.x, p.y);
-    //std::cout << "Cost: " << cost << " Defense: " << defense << std::endl;
 }
 

@@ -23,8 +23,9 @@ public:
 
         Node(SDL_Point point, int cost, SDL_Point parent, int totalCost) : _point(point), _cost(cost), _parent(parent),
                                                                            _totalCost(totalCost) {}
-        Node(Node const &node): _point(node._point), _cost(node._cost), _parent(node._parent),
-                         _totalCost(node._totalCost) {}
+
+        Node(Node const &node) = default;
+
         bool operator>(const Node &other) const { return _totalCost > other._totalCost; }
 
     };
@@ -50,21 +51,23 @@ public:
     };
 
     struct PointHash {
-        std::size_t operator()(const SDL_Point& point) const {
+        std::size_t operator()(const SDL_Point &point) const {
             return std::hash<int>()(point.x) ^
-                    (std::hash<int>()(point.y) << 1);
+                   (std::hash<int>()(point.y) << 1);
         }
     };
+
     struct PointEqual {
-        bool operator()(const SDL_Point& a, const SDL_Point& b) const {
+        bool operator()(const SDL_Point &a, const SDL_Point &b) const {
             return a.x == b.x && a.y == b.y;
         }
     };
 
 
+    std::unordered_set<SDL_Point, PointHash, PointEqual>
+    calculateMoveRadius(SDL_Point start, int movePoints, MovementType movementType);
 
-    std::unordered_set<SDL_Point, PointHash, PointEqual> calculateMoveRadius(SDL_Point start, int movePoints, MovementType movementType);
-    std::vector<SDL_Point> findShortestPath(SDL_Point start, SDL_Point end, MovementType movementType);
+    std::vector<SDL_Point> findShortestPath(SDL_Point start, SDL_Point end, int movePoints, MovementType movementType);
 
     PathFinder(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats);
 
@@ -78,7 +81,8 @@ private:
 
     std::unordered_map<MoveRadiusCacheKey, std::unordered_map<SDL_Point, Node, PointHash, PointEqual>, MoveRadiusCacheKeyHash> _nodeCache;
 
-    static std::unordered_set<SDL_Point, PathFinder::PointHash, PathFinder::PointEqual> extractPoints(const std::unordered_map<SDL_Point, Node, PointHash, PointEqual>& nodes);
+    static std::unordered_set<SDL_Point, PathFinder::PointHash, PathFinder::PointEqual>
+    extractPoints(const std::unordered_map<SDL_Point, Node, PointHash, PointEqual> &nodes);
 
     [[nodiscard]] const std::vector<std::vector<int>> *getWeightedGraph(MovementType movementType) const;
 
