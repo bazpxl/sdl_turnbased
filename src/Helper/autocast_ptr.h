@@ -1,6 +1,6 @@
 #pragma once
 
-#include <global.h>
+#include "global.h"
 
 template<typename T>
 class autocast_shared_ptr;
