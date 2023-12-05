@@ -1,27 +1,29 @@
-#ifndef RH_H
-#define RH_H
+#ifndef RENDER_SINGLETON_H
+#define RENDER_SINGLETON_H
+
 #include "SDL.h"
 
 class RS {
 private:
-    SDL_Renderer* _renderer = nullptr;
     static RS* _instance;
+    SDL_Renderer* _renderer = nullptr;
+    SDL_Texture* _mainTexture = nullptr;
 
     RS() = default;
 
 public:
     static RS& getInstance();
-
     void init(SDL_Renderer* renderer);
 
     [[nodiscard]] SDL_Renderer* get() const;
 
-    // Prevent copy and assignment
-    RS(RS const&) = delete;
-    void operator=(RS const&)  = delete;
+    void setTexture(SDL_Texture* texture);
+    [[nodiscard]] SDL_Texture* getTexture() const;
+
+    RS(const RS&) = delete;
+    RS& operator=(const RS&) = delete;
+
+    ~RS();
 };
 
-
-
-
-#endif
+#endif // RENDER_SINGLETON_H

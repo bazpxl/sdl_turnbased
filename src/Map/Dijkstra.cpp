@@ -38,8 +38,8 @@ std::vector<std::vector<int>> PathFinder::convertToWeightedGraph(MovementType mo
 }
 
 // retruns a pointer to the weighted graph for the given movement type
-const std::vector<std::vector<int>> *PathFinder::getWeightedGraph(MovementType movementType) const {
-    return &_movementCostsTypeMapping.at(movementType);
+const std::vector<std::vector<int>> &PathFinder::getWeightedGraph(MovementType movementType) const {
+    return _movementCostsTypeMapping.at(movementType);
 }
 
 // helper to check if a point is within the map
@@ -55,7 +55,6 @@ PathFinder::getNeighbors(PathFinder::Node *node, std::vector<std::vector<int>> &
         throw std::invalid_argument("Node pointer cannot be null.");
     }
     std::vector<Node> neighbors;
-    neighbors.reserve(4);
     SDL_Point parent = node->_point;
     SDL_Point newPoint;
     int cost;
@@ -110,10 +109,10 @@ PathFinder::calculateMoveRadius(SDL_Point start, int movePoints, MovementType mo
     }
 
     std::unordered_map<SDL_Point, Node, PointHash, PointEqual> nodes = {
-            {{start}, Node(start, 0, start, 0)}
+            {start, Node(start, 0, start, 0)}
     };
     std::priority_queue<Node, std::vector<Node>, std::greater<>> queue;
-    std::vector<std::vector<int>> weightedGraph = *getWeightedGraph(movementType);
+    std::vector<std::vector<int>> weightedGraph = getWeightedGraph(movementType);
 
     queue.emplace(start, 0, start, 0);
 
