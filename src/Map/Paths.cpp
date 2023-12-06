@@ -16,7 +16,7 @@ Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapSta
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TIRE_A));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TIRE_B));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TREAD));
-    printGraph(_weightedGraphs[2]);
+    //printGraph(_weightedGraphs[2]);
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::AIR));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::SEA));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TRANSPORT_BOAT));
@@ -135,39 +135,33 @@ bool Paths::mouseInRadius(SDL_Point pos) {
     return false;
 }
 
-void Paths::drawMoveRadius(float dt) {
+void Paths::drawMoveRadius(u32 frame) {
     SDL_Renderer *renderer = RS::getInstance().get();
     SDL_Texture *texture = RS::getInstance().getTexture();
 
     SDL_Rect srcRect;
     SDL_Rect destRect;
     // 198
-    int tileIndex = 79;
-    int tilesPerRow = 18;
-    int tileSize = 16;
 
-    /*_timePassed += dt;
-    if (_timePassed >= 0.33f) {
-        _timePassed = 0;
-        _offset = (_offset + 1) % 3;
-    }*/
 
-    srcRect.w = srcRect.h = tileSize;
-    srcRect.x = ((tileIndex /*+ _offset*/) % tilesPerRow) * tileSize;
-    srcRect.y = (tileIndex / tilesPerRow) * tileSize;
+    _offset = frame / 3 % 16;
 
-    destRect.w = destRect.h = tileSize * 2 - 2;
+
+    srcRect.w = srcRect.h = 32;
+    srcRect.x = int(_offset) * 32;
+    srcRect.y = 176;
+
+    destRect.w = destRect.h = 16 * 2 - 2;
 
     for (auto &i: _cachedMoveRadius) {
-        destRect.x = i._coordinates.x * tileSize * 2 + 1;
-        destRect.y = i._coordinates.y * tileSize * 2 + 1;
+        destRect.x = i._coordinates.x * 16 * 2 + 1;
+        destRect.y = i._coordinates.y * 16 * 2 + 1;
         //_offset = (_offset + 1) % 3;
         SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &destRect);
     }
 }
-
 
 
 std::vector<SDL_Point> Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints) {

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <SDL.h>
 #include "Helper/render_singleton.h"
+#include "global.h"
 
 
 class Paths {
@@ -38,7 +39,7 @@ public:
     //std::vector<SDL_Point> getAttackRadius();
     Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats);
 
-    void drawMoveRadius(float dt);
+    void drawMoveRadius(u32 frame);
 
 private:
     const MapStats &_mapStats;
@@ -49,9 +50,8 @@ private:
 
     std::vector<Node> _cachedMoveRadius;
 
-    float _timePassed = 0.0f;
 
-    int _offset = 0;
+    u32 _offset = 0;
 
     std::vector<std::vector<int>> convertToWeightedGraph(MovementType movementType);
 

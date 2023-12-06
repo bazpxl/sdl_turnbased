@@ -92,7 +92,7 @@ void WarState::Init() {
     pathFinder = new PathFinder(Map, MapStats::getInstance(&Map));
     paths = new Paths(Map, MapStats::getInstance(&Map));
 
-    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tilesetV2.png");
+    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tilesetV3.png");
     if (!texture) {
         std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
@@ -120,7 +120,7 @@ bool WarState::HandleEvent(const Event &event) {
 
     if (infantryUnit && paths && paths->mouseInRadius(mousePos)) {
         uPath = paths->getPath(infantryUnit->getCoordinates(), {mousePos.x / 32, mousePos.y / 32}, MovementType::TIRE_A,
-                               20);
+                               10);
     } else {
         uPath.clear();
     }
@@ -148,16 +148,9 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
         }
     }
 
-    auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::TIRE_A, 20);
-    paths->drawMoveRadius(deltaT);
-   /* for (auto &point: path) {
-        destRect.x = point.x * 32;
-        destRect.y = point.y * 32;
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        drawTile(renderer, texture, 79, destRect);
-        SDL_RenderDrawRect(renderer, &destRect);
-        //SDL_RenderCopy(renderer, texture, nullptr, &destRect);
-    }*/
+    auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::TIRE_A, 10);
+    paths->drawMoveRadius(frame);
+
 
 
     if (!uPath.empty()) {
