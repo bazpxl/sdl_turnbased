@@ -11,7 +11,7 @@ SDL_Texture *texture;
 SDL_Point mousePos;
 std::vector<SDL_Point> uPath;
 std::vector<std::vector<std::vector<int>>> Map;
-#define BasePath "../../"
+
 TTF_Font *indexFont;
 
 
@@ -86,8 +86,8 @@ void WarState::Init() {
     uPath.clear();
     RS::getInstance().init(renderer);
 
-    Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
-    Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
+    Map.push_back(csvToMap(BasePath "asset/map/unittest/map_Background.csv"));
+    Map.push_back(csvToMap(BasePath"asset/map/unittest/map_Objects.csv"));
 
     pathFinder = new PathFinder(Map, MapStats::getInstance(&Map));
     paths = new Paths(Map, MapStats::getInstance(&Map));
@@ -105,7 +105,8 @@ void WarState::Init() {
 }
 
 void WarState::UnInit() {
-
+    delete(paths);
+    delete(pathFinder);
 }
 
 bool WarState::HandleEvent(const Event &event) {
