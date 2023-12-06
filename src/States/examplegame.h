@@ -7,6 +7,7 @@
 #include "Helper/autocast_ptr.h"
 #include "Helper/render_singleton.h"
 #include "Map/Dijkstra.h"
+#include "Map/Paths.h"
 
 class ExampleGame;
 class WarState;
@@ -32,6 +33,7 @@ class WarState : public ExampleGameState
 public:
     // ctor
     PathFinder *pathFinder;
+    Paths *paths;
     using ExampleGameState::ExampleGameState;
 
     void Init() override;

@@ -5,10 +5,13 @@
 #include "Helper/map_stat_helper.h"
 #include "examplegame.h"
 #include "Map/Dijkstra.h"
+#include "Map/Paths.h"
 
 SDL_Texture *texture;
+SDL_Point mousePos;
+std::vector<SDL_Point> uPath;
 std::vector<std::vector<std::vector<int>>> Map;
-#define BasePath "../../"
+
 TTF_Font *indexFont;
 
 
@@ -28,7 +31,7 @@ void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex
 
 void
 renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, int tileSize = 16, int tilesPerRow = 18,
-              int tilesPerColumn = 11) {
+              int tilesPerColumn = 12) {
     SDL_Rect srcRect;
     SDL_Rect destRect;
     srcRect.w = srcRect.h = tileSize;
@@ -80,29 +83,56 @@ std::vector<std::vector<int>> csvToMap(const string &filename) {
 
 
 void WarState::Init() {
+    uPath.clear();
     RS::getInstance().init(renderer);
-    Map.push_back(csvToMap("../../asset/map/unittest/map_Background.csv"));
-    Map.push_back(csvToMap("../../asset/map/unittest/map_Objects.csv"));
+
+    Map.push_back(csvToMap(BasePath "asset/map/unittest/map_Background.csv"));
+    Map.push_back(csvToMap(BasePath"asset/map/unittest/map_Objects.csv"));
 
     pathFinder = new PathFinder(Map, MapStats::getInstance(&Map));
+    paths = new Paths(Map, MapStats::getInstance(&Map));
 
-    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tileset.png");
+    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tilesetV3.png");
     if (!texture) {
         std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
+    RS::getInstance().setTexture(texture);
     Unit::setTexture(texture);
+    texture = RS::getInstance().getTexture();
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 7, 9, 3);
+    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 7, 10, 3);
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 12);
 }
 
 void WarState::UnInit() {
-
+    delete(paths);
+    delete(pathFinder);
 }
 
 bool WarState::HandleEvent(const Event &event) {
+
+    if (event.type == SDL_MOUSEMOTION) {
+        mousePos.x = event.motion.x;
+        mousePos.y = event.motion.y;
+    }
+
+
+
+
+    if (infantryUnit && paths && paths->mouseInRadius(mousePos)) {
+        uPath = paths->getPath(infantryUnit->getCoordinates(), {mousePos.x / 32, mousePos.y / 32}, MovementType::TIRE_A,
+                               10);
+    } else {
+        uPath.clear();
+    }
+
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
+        infantryUnit->setCoordinates(mousePos.x / 32, mousePos.y / 32);
+    }
+
     return false;
 }
+
 
 void WarState::Update(const u32 frame, const u32 totalMSec, const float deltaT) {
 }
@@ -119,22 +149,22 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
         }
     }
 
-    auto path = pathFinder->calculateMoveRadius({7, 9}, 3, MovementType::INFANTRY);
+    auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::TIRE_A, 10);
+    paths->drawMoveRadius(frame);
 
-    for (auto &point: path) {
-        destRect.x = point.x * 32;
-        destRect.y = point.y * 32;
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderDrawRect(renderer, &destRect);
-    }
 
-    auto spath = pathFinder->findShortestPath({7, 9}, {5, 10}, 3, MovementType::INFANTRY);
-    for (auto &point: spath) {
-        destRect.x = point.x * 32;
-        destRect.y = point.y * 32;
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_RenderFillRect(renderer, &destRect);
+
+    if (!uPath.empty()) {
+        for (auto &point: uPath) {
+            destRect.x = point.x * 32 + 8;
+            destRect.y = point.y * 32 + 8;
+            destRect.w = destRect.h = 16;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &destRect);
+
+        }
     }
     infantryUnit->draw();
+    //renderTileset(renderer, texture, indexFont);
 }
 

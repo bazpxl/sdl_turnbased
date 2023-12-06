@@ -12,9 +12,7 @@ class PathFinder {
 public:
     class Node {
     public:
-        Node() {
-
-        }
+        Node() = default;
 
         SDL_Point _point;
         int _cost;
@@ -84,7 +82,7 @@ private:
     static std::unordered_set<SDL_Point, PathFinder::PointHash, PathFinder::PointEqual>
     extractPoints(const std::unordered_map<SDL_Point, Node, PointHash, PointEqual> &nodes);
 
-    [[nodiscard]] const std::vector<std::vector<int>> *getWeightedGraph(MovementType movementType) const;
+    [[nodiscard]] const std::vector<std::vector<int>> &getWeightedGraph(MovementType movementType) const;
 
     std::vector<std::vector<int>> convertToWeightedGraph(MovementType movementType);
 

@@ -3,33 +3,33 @@
 Player::Player(int x, int y, int actHouses, int playerTeam, int curr): pos{x,y}, currency{curr}, activeHouses{actHouses}, team{playerTeam} {}
 
 void Player::setPos(const SDL_Point& newPos) {
-    pos = newPos;
+    _pos = newPos;
 }
 
 void Player::setCurrency(int newCurrency) {
     if (newCurrency >= 0){
-        currency = newCurrency;
+        _currency = newCurrency;
     }
 }
 
 void Player::setActiveHouses(int newActiveHouses) {
-    activeHouses = newActiveHouses;
+    _activeHouses = newActiveHouses;
 }
 
 SDL_Point Player::getPos() {
-    return pos;
+    return _pos;
 }
 
 int Player::getCurrency() const{
-    return currency;
+    return _currency;
 }
 
 int Player::getActiveHouses() const{
-    return activeHouses;
+    return _activeHouses;
 }
 
 int Player::getTeam() const{
-    return team;
+    return _team;
 }
 
 
