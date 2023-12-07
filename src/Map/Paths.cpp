@@ -136,30 +136,32 @@ bool Paths::mouseInRadius(SDL_Point pos) {
 }
 
 void Paths::drawMoveRadius(u32 frame) {
-    SDL_Renderer *renderer = RS::getInstance().get();
-    SDL_Texture *texture = RS::getInstance().getTexture();
+    if(!_cachedMoveRadius.empty()) {
+        SDL_Renderer *renderer = RS::getInstance().get();
+        SDL_Texture *texture = RS::getInstance().getTexture();
 
-    SDL_Rect srcRect;
-    SDL_Rect destRect;
-    // 198
-
-
-    _offset = frame / 3 % 16;
+        SDL_Rect srcRect;
+        SDL_Rect destRect;
+        // 198
 
 
-    srcRect.w = srcRect.h = 32;
-    srcRect.x = int(_offset) * 32;
-    srcRect.y = 176;
+        _offset = frame / 3 % 16;
 
-    destRect.w = destRect.h = 16 * 2 - 2;
 
-    for (auto &i: _cachedMoveRadius) {
-        destRect.x = i._coordinates.x * 16 * 2 + 1;
-        destRect.y = i._coordinates.y * 16 * 2 + 1;
-        //_offset = (_offset + 1) % 3;
-        SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderDrawRect(renderer, &destRect);
+        srcRect.w = srcRect.h = 32;
+        srcRect.x = int(_offset) * 32;
+        srcRect.y = 176;
+
+        destRect.w = destRect.h = 16 * 2 - 2;
+
+        for (auto &i: _cachedMoveRadius) {
+            destRect.x = i._coordinates.x * 16 * 2 + 1;
+            destRect.y = i._coordinates.y * 16 * 2 + 1;
+            //_offset = (_offset + 1) % 3;
+            SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderDrawRect(renderer, &destRect);
+        }
     }
 }
 

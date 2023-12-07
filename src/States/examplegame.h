@@ -9,6 +9,7 @@
 #include "Map/Dijkstra.h"
 #include "Map/Paths.h"
 #include "player.h"
+#include "Units/Unit.h"
 
 class ExampleGame;
 class WarState;
@@ -36,6 +37,14 @@ public:
     PathFinder *pathFinder;
     Paths *paths;
     Player * currentPlayer;
+    //Map
+    std::vector<std::vector<std::vector<int>>> Map;
+    // Units
+    Unit * selected;
+
+    std::vector<SDL_Point> radius;
+    std::vector<SDL_Point> path;
+    std::vector<std::vector<Unit*>> unitMap;;
     using ExampleGameState::ExampleGameState;
 
     void Init() override;

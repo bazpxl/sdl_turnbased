@@ -16,6 +16,7 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
         _ammo(ammo),
         _price(price) {
     _renderer = RS::getInstance().get();
+
 }
 
 void Unit::draw() {
@@ -31,8 +32,15 @@ void Unit::draw() {
             32,
             32
     };
-
+    if (_finishedTurn) {
+        SDL_SetTextureColorMod(_texture, 128, 128, 128);
+    }
     SDL_RenderCopyEx(_renderer, _texture, &sourceRect, &destRect, 0, nullptr, _direction);
+    SDL_SetTextureColorMod(_texture, 255, 255, 255);
+}
+
+int Unit::getTeam() const {
+    return _team;
 }
 
 UnitType Unit::getType() const {
@@ -84,7 +92,6 @@ bool Unit::isFinishedTurn() const {
 }
 
 
-
 void Unit::setFuel(int fuel) {
     _fuel = fuel;
 }
@@ -126,6 +133,10 @@ SDL_Texture *Unit::_texture = nullptr;
 
 void Unit::setTexture(SDL_Texture *texture) {
     _texture = texture;
+}
+std::vector<std::vector<Unit*>> *Unit::_unitMap = nullptr;
+void Unit::setUnitMap(std::vector<std::vector<Unit*>> *unitMap) {
+    _unitMap = unitMap;
 }
 
 Infantry::Infantry(int x, int y, int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,
