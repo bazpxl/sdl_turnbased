@@ -3,7 +3,7 @@
 constexpr bool doBenchmark = true;
 
 ExampleGame::ExampleGame()
-	: Game( "Warcrimes", Point{ 928, 544 }, !doBenchmark )
+	: Game("Warcrimes",{15*32,11*32}, false)
 {
 	// Will be freed in Game dtor
 	allStates = {

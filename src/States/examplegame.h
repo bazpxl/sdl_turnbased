@@ -8,6 +8,7 @@
 #include "Helper/render_singleton.h"
 #include "Map/Dijkstra.h"
 #include "Map/Paths.h"
+#include "player.h"
 
 class ExampleGame;
 class WarState;
@@ -34,6 +35,7 @@ public:
     // ctor
     PathFinder *pathFinder;
     Paths *paths;
+    Player * currentPlayer;
     using ExampleGameState::ExampleGameState;
 
     void Init() override;
