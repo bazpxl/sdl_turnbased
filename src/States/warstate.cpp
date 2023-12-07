@@ -17,8 +17,10 @@ TTF_Font *indexFont;
 
 std::unique_ptr<Unit> infantryUnit;
 
-void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex, SDL_Rect &destRect, int tileSize = 16,
-              int tilesPerRow = 18) {
+void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex, SDL_Rect &destRect, int imgSizeX,
+              int tileSize = 16) {
+    int tilesPerRow = imgSizeX / tileSize;
+
     SDL_Rect srcRect;
     srcRect.w = srcRect.h = tileSize;
     srcRect.x = (tileIndex % tilesPerRow) * tileSize;
@@ -30,10 +32,11 @@ void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex
 }
 
 void
-renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, int tileSize = 16, int tilesPerRow = 18,
-              int tilesPerColumn = 12) {
+renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, SDL_Point imgSize, int tileSize = 16) {
     SDL_Rect srcRect;
     SDL_Rect destRect;
+    int tilesPerRow = imgSize.x / tileSize;
+    int tilesPerColumn = imgSize.y / tileSize;
     srcRect.w = srcRect.h = tileSize;
     destRect.w = destRect.h = tileSize * 2;
 
@@ -86,13 +89,13 @@ void WarState::Init() {
     uPath.clear();
     RS::getInstance().init(renderer);
 
-    Map.push_back(csvToMap(BasePath "asset/map/unittest/map_Background.csv"));
-    Map.push_back(csvToMap(BasePath"asset/map/unittest/map_Objects.csv"));
+    Map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
+    Map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
 
     pathFinder = new PathFinder(Map, MapStats::getInstance(&Map));
     paths = new Paths(Map, MapStats::getInstance(&Map));
 
-    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/tilesetV3.png");
+    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/NewTiles.png");
     if (!texture) {
         std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
@@ -100,13 +103,13 @@ void WarState::Init() {
     Unit::setTexture(texture);
     texture = RS::getInstance().getTexture();
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 7, 10, 3);
-    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 12);
+    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 3);
+    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 }
 
 void WarState::UnInit() {
-    delete(paths);
-    delete(pathFinder);
+    delete (paths);
+    delete (pathFinder);
 }
 
 bool WarState::HandleEvent(const Event &event) {
@@ -120,8 +123,8 @@ bool WarState::HandleEvent(const Event &event) {
 
 
     if (infantryUnit && paths && paths->mouseInRadius(mousePos)) {
-        uPath = paths->getPath(infantryUnit->getCoordinates(), {mousePos.x / 32, mousePos.y / 32}, MovementType::TIRE_A,
-                               10);
+        uPath = paths->getPath(infantryUnit->getCoordinates(), {mousePos.x / 32, mousePos.y / 32}, MovementType::INFANTRY,
+                               3);
     } else {
         uPath.clear();
     }
@@ -144,12 +147,12 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
             for (size_t k = 0; k < Map[layer][j].size(); k++) {
                 destRect.x = int(k) * 32;
                 destRect.y = int(j) * 32;
-                drawTile(renderer, texture, Map[layer][j][k], destRect);
+                drawTile(renderer, texture, Map[layer][j][k], destRect,512);
             }
         }
     }
 
-    auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::TIRE_A, 10);
+    auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::INFANTRY, 3);
     paths->drawMoveRadius(frame);
 
 
@@ -165,6 +168,6 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
         }
     }
     infantryUnit->draw();
-    //renderTileset(renderer, texture, indexFont);
+    //renderTileset(renderer, texture, indexFont, {512, 208});
 }
 
