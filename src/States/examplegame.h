@@ -31,6 +31,20 @@ public:
 
 class WarState : public ExampleGameState
 {
+private:
+	SDL_Texture* _panelTexture;
+	SDL_Texture *_texture;
+	TTF_Font *_indexFont;
+	std::vector<SDL_Texture*>_panelFontTextures;
+
+
+	std::vector<SDL_Point> uPath;
+	std::vector<std::vector<std::vector<int>>> Map;
+
+	SDL_Point _mousePos;
+	bool _unitSelected = false;
+	int _selectionIndex;
+	int _currentTeam;
 public:
     // ctor
     PathFinder *pathFinder;

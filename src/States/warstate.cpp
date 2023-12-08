@@ -7,15 +7,12 @@
 #include "Map/Dijkstra.h"
 #include "Map/Paths.h"
 
-SDL_Texture *texture;
-SDL_Point mousePos;
-std::vector<SDL_Point> uPath;
-std::vector<std::vector<std::vector<int>>> Map;
-
-TTF_Font *indexFont;
 
 
-std::unique_ptr<Unit> infantryUnit;
+
+//std::unique_ptr<Unit> infantryUnit;
+std::vector<std::unique_ptr<Unit>> infantryVector;
+std::vector<Player> playerVec;
 
 void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex, SDL_Rect &destRect, int imgSizeX,
               int tileSize = 16) {
@@ -30,6 +27,7 @@ void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex
 
     SDL_RenderCopy(renderer, tilesetTexture, &srcRect, &destRect);
 }
+
 
 void
 renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, SDL_Point imgSize, int tileSize = 16) {
@@ -95,43 +93,99 @@ void WarState::Init() {
     pathFinder = new PathFinder(Map, MapStats::getInstance(&Map));
     paths = new Paths(Map, MapStats::getInstance(&Map));
 
-    texture = IMG_LoadTexture(renderer, BasePath"asset/graphic/NewTiles.png");
-    if (!texture) {
+	_texture = IMG_LoadTexture( renderer, BasePath"asset/graphic/NewTiles.png");
+    if (!_texture) {
         std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
-    RS::getInstance().setTexture(texture);
-    Unit::setTexture(texture);
-    texture = RS::getInstance().getTexture();
+    RS::getInstance().setTexture( _texture);
+    Unit::setTexture( _texture);
+	_texture = RS::getInstance().getTexture();
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 3);
-    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+
+	_panelTexture = IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png");
+	if (!_panelTexture) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
+    //infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 3);
+
+	_currentTeam = 1;
+
+	infantryVector.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 7,1));
+	infantryVector.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 4,1));
+
+
+	_indexFont = TTF_OpenFont( BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 8);
+
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+
+	SDL_FreeSurface(textSurface);
+
 }
 
 void WarState::UnInit() {
     delete (paths);
     delete (pathFinder);
+
+	for(auto k : _panelFontTextures){
+		SDL_DestroyTexture(k);
+	}
+	SDL_DestroyTexture( _panelTexture);
 }
 
 bool WarState::HandleEvent(const Event &event) {
 
     if (event.type == SDL_MOUSEMOTION) {
-        mousePos.x = event.motion.x;
-        mousePos.y = event.motion.y;
+	    _mousePos.x = event.motion.x;
+	    _mousePos.y = event.motion.y;
     }
 
+	if(_unitSelected)
+	{
+		if( infantryVector[_selectionIndex].get() && paths && paths->mouseInRadius( _mousePos ) )
+		{
+			uPath = paths->getPath( infantryVector[_selectionIndex]->getCoordinates(), { _mousePos.x / 32, _mousePos.y / 32 }, MovementType::INFANTRY,
+			                        3 );
 
-
-
-    if (infantryUnit && paths && paths->mouseInRadius(mousePos)) {
-        uPath = paths->getPath(infantryUnit->getCoordinates(), {mousePos.x / 32, mousePos.y / 32}, MovementType::INFANTRY,
-                               3);
-    } else {
-        uPath.clear();
-    }
-
-    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
-        infantryUnit->setCoordinates(mousePos.x / 32, mousePos.y / 32);
-    }
+			// MOVE
+			if( event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT ){
+				infantryVector[_selectionIndex]->setCoordinates( _mousePos.x / 32, _mousePos.y / 32 );
+			}
+		}
+		else
+		{
+			uPath.clear();
+		}
+		// DESELECT
+		if( event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT )
+		{
+			_unitSelected = false;
+		}
+	}
+	else
+	{
+		if(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT){
+			int n = 0;
+			for (auto const &unit : infantryVector)
+			{
+				SDL_Point position = unit->getCoordinates();
+				if( (position.x == (_mousePos.x / 32) ) && (position.y == (_mousePos.y / 32)) )
+				{
+					_selectionIndex = n;
+					_unitSelected = true;
+				}
+				n++;
+			}
+		}
+	}
 
     return false;
 }
@@ -147,27 +201,54 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
             for (size_t k = 0; k < Map[layer][j].size(); k++) {
                 destRect.x = int(k) * 32;
                 destRect.y = int(j) * 32;
-                drawTile(renderer, texture, Map[layer][j][k], destRect,512);
+                drawTile( renderer, _texture, Map[layer][j][k], destRect, 512);
             }
         }
     }
+	if(_unitSelected)
+	{
+		if(!infantryVector[_selectionIndex]->hasMoved())
+		{
+			//auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::INFANTRY, 3);
+			auto path = paths->getMoveRadius( infantryVector[_selectionIndex]->getCoordinates(), MovementType::INFANTRY, 3 );
+			paths->drawMoveRadius( frame );
+			if( !uPath.empty() )
+			{
+				for( auto const & point : uPath )
+				{
+					destRect.x = point.x * 32 + 8;
+					destRect.y = point.y * 32 + 8;
+					destRect.w = destRect.h = 16;
+					SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255 );
+					SDL_RenderFillRect( renderer, &destRect );
+				}
+			}
+		}
+		for(auto const &unit : infantryVector){
+			unit->draw();
+		}
+	}
+	else
+	{
+		for(auto const &unit : infantryVector){
+			unit->draw();
+		}
 
-    auto path = paths->getMoveRadius(infantryUnit->getCoordinates(), MovementType::INFANTRY, 3);
-    paths->drawMoveRadius(frame);
+		// draw InfoPanel
+		// ----------------------------------------------------------------
+		const SDL_Point & winSize = game.GetWindowSize();
+		destRect = {10, winSize.y - 60,50, 50};
+		SDL_RenderCopy( renderer, _panelTexture, EntireRect, &destRect);
 
+		int defense = 0;
+		if( ((_mousePos.x / 32) >= 0 ) && ((_mousePos.y / 32) >= 0)){
+			defense = MapStats::getInstance(&Map).getDefense( _mousePos.x / 32, _mousePos.y / 32);
+		}
+		destRect = {23, winSize.y - 60, 25,15};
+		SDL_RenderCopy( renderer, _panelFontTextures[defense], EntireRect, &destRect);
+		//--------------------------------------------------------------------
+	}
 
-
-    if (!uPath.empty()) {
-        for (auto &point: uPath) {
-            destRect.x = point.x * 32 + 8;
-            destRect.y = point.y * 32 + 8;
-            destRect.w = destRect.h = 16;
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-            SDL_RenderFillRect(renderer, &destRect);
-
-        }
-    }
-    infantryUnit->draw();
-    //renderTileset(renderer, texture, indexFont, {512, 208});
+    //renderTileset(renderer, _texture, _indexFont, {512, 208});
 }
 
