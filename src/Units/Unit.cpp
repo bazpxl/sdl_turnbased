@@ -128,6 +128,11 @@ void Unit::setTexture(SDL_Texture *texture) {
     _texture = texture;
 }
 
+int Unit::getTeam() const
+{
+	return _team;
+}
+
 Infantry::Infantry(int x, int y, int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,
                                                   team, 3, 1, 99, 99,
                                                   99, 1000) {}

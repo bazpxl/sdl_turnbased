@@ -49,7 +49,7 @@ public:
     // ctor
     PathFinder *pathFinder;
     Paths *paths;
-    Player * currentPlayer;
+
     using ExampleGameState::ExampleGameState;
 
     void Init() override;

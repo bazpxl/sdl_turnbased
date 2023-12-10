@@ -10,9 +10,8 @@ class Player {
     const int _team;
 
 private:
-    Player(int x, int y, int activeHouses,int team, int currency = 1000);
 
-    void setPos(const SDL_Point &newPos);
+	void setPos(const SDL_Point &newPos);
 
     void setCurrency(int newCurrency);
 
@@ -24,7 +23,9 @@ private:
 
     [[nodiscard]] int getActiveHouses() const;
 
-    [[nodiscard]] int getTeam() const;
+public:
+	Player(int x, int y, int activeHouses,int team, int currency = 1000);
+	[[nodiscard]] int getTeam() const;
 };
 
 

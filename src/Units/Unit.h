@@ -14,7 +14,10 @@ protected:
     SDL_Point _coordinates; // Index Position
     int _startX, _startY;
     int _team;
-    SDL_RendererFlip _direction = SDL_FLIP_NONE;
+public:
+	int getTeam() const;
+protected:
+	SDL_RendererFlip _direction = SDL_FLIP_NONE;
     int _hp = 100;
     const int _maxHp = 100;
     const int _moveRange;
