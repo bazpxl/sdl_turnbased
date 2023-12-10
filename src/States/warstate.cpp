@@ -11,12 +11,27 @@ SDL_Texture *texture;
 bool radiusVisible = false;
 SDL_Point mousePos;
 std::vector<SDL_Point> uPath;
+bool mouseDown = false;
+bool sameClick = true;
 
 
 TTF_Font *indexFont;
 
 
 std::unique_ptr<Unit> infantryUnit;
+std::unique_ptr<Unit> mechUnit;
+std::unique_ptr<Unit> infantryUnit2;
+
+#include <SDL_rect.h>
+
+bool operator==(const SDL_Point &lhs, const SDL_Point &rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool operator!=(const SDL_Point &lhs, const SDL_Point &rhs) {
+    return !(lhs == rhs);
+}
+
 
 void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex, SDL_Rect &destRect, int imgSizeX,
               int tileSize = 16) {
@@ -117,7 +132,12 @@ void WarState::Init() {
     texture = RS::getInstance().getTexture();
 
     infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2);
+    mechUnit = UnitFactory::createUnit(UnitType::MECH, 1, 8, 2);
+    infantryUnit2 = UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1);
+
+    unitMap[2][13] = infantryUnit2.get();
     unitMap[9][2] = infantryUnit.get();
+    unitMap[8][1] = mechUnit.get();
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 }
 
@@ -127,49 +147,58 @@ void WarState::UnInit() {
 }
 
 bool WarState::HandleEvent(const Event &event) {
-    // Mouse Update
     if (event.type == SDL_MOUSEMOTION) {
-        mousePos.x = event.motion.x;
-        mousePos.y = event.motion.y;
+        mousePos.x = event.motion.x / 32;
+        mousePos.y = event.motion.y / 32;
+    }
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+        mouseDown = true;
+    }
+    if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) {
+        mouseDown = false;
+        sameClick = false;
+    }
 
-        // Wenn die Maus bewegt wird und eine Einheit ausgewählt ist
-        if (selected) {
-            if (paths->mouseInRadius(mousePos)) {
-                uPath = paths->getPath(selected->getCoordinates(), {mousePos.x / 32, mousePos.y / 32},
-                                       selected->getMovementType(),
-                                       selected->getMoveRange());
-            } else {
+
+    auto unit = unitMap[mousePos.y][mousePos.x];
+    if ((mouseDown && unit) || selected) {
+        if (unit != nullptr && unit->getTeam() == 1) {
+            selected = unit;
+        }
+        if (unit != nullptr && !selected && unit->getTeam() != 1) {
+
+            uPath.clear();
+            radius = paths->getMoveRadius(mousePos, unit->getMovementType(), unit->getMoveRange(),
+                                          radius);
+
+        } else if (selected) {
+            radius = paths->getMoveRadius(selected->getCoordinates(),
+                                          selected->getMovementType(),
+                                          selected->getMoveRange(),
+                                          radius);
+            uPath = paths->getPath(selected->getCoordinates(), mousePos, radius);
+
+            if (!sameClick && event.type == SDL_MOUSEBUTTONDOWN && event.button.button && paths->mouseInRadius(mousePos, radius) && mousePos != selected->getCoordinates()) {
+                unitMap[selected->getCoordinates().y][selected->getCoordinates().x] = nullptr;
+                unitMap[mousePos.y][mousePos.x] = selected;
+                selected->setCoordinates(mousePos.x, mousePos.y);
                 uPath.clear();
+                radius.clear();
+                selected = nullptr;
+                sameClick = true;
+            } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT &&
+                       !paths->mouseInRadius(mousePos, radius)) {
+                uPath.clear();
+                radius.clear();
+                selected = nullptr;
             }
-            radiusVisible = false;
+
         }
+    } else {
+        uPath.clear();
+        radius.clear();
     }
 
-    // Radius Stuff
-    if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int mouseIndexX = mousePos.x / 32;
-        int mouseIndexY = mousePos.y / 32;
-
-        if (unitMap[mouseIndexY][mouseIndexX]) {
-            selected = unitMap[mouseIndexY][mouseIndexX];
-            if (selected->getTeam() != 1/*currentPlayer->getTeam()*/) {
-                radius = paths->getMoveRadius(selected->getCoordinates(), selected->getMovementType(),
-                                              selected->getMoveRange());
-                radiusVisible = true; // Zeige den Radius nur, wenn eine Einheit ausgewählt wird
-            }
-        } else {
-            selected = nullptr;
-            radius.clear();
-            radiusVisible = false;
-        }
-    }
-
-    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT && selected) {
-        selected->setCoordinates(mousePos.x / 32, mousePos.y / 32);
-        radiusVisible = false;  // Verstecke den Radius nach dem Versetzen der Einheit
-    }
-
-    std::cout << MapStats::getInstance(&Map).getDefense(1,9) << std::endl;
     return false;
 }
 
@@ -189,8 +218,8 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
         }
     }
 
-    if(selected)
-        paths->drawMoveRadius(frame);
+    //if (selected)
+    paths->drawMoveRadius(frame, radius);
 
 
     if (!uPath.empty()) {
@@ -203,7 +232,9 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
         }
     }
+    infantryUnit2->draw();
     infantryUnit->draw();
+    mechUnit->draw();
     //renderTileset(renderer, texture, indexFont, {512, 208});
 }
 

@@ -42,7 +42,7 @@ public:
     // Units
     Unit * selected;
 
-    std::vector<SDL_Point> radius;
+    std::vector<Paths::Node> radius;
     std::vector<SDL_Point> path;
     std::vector<std::vector<Unit*>> unitMap;;
     using ExampleGameState::ExampleGameState;

@@ -125,6 +125,11 @@ SDL_Point Unit::getCoordinates() const {
 }
 
 void Unit::setCoordinates(int x, int y) {
+    if (x < _coordinates.x) {
+        _direction = SDL_FLIP_HORIZONTAL;
+    } else if (x > _coordinates.x) {
+        _direction = SDL_FLIP_NONE;
+    }
     _coordinates.x = x;
     _coordinates.y = y;
 }

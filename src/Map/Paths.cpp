@@ -115,19 +115,19 @@ std::vector<SDL_Point> Paths::nodeToPointVector(std::vector<Node> &vector) {
     return points;
 }
 
-bool Paths::mouseInRadius(SDL_Point pos) {
-    if (_cachedMoveRadius.empty()) {
+bool Paths::mouseInRadius(SDL_Point pos, std::vector<Node> &radius) {
+    if (radius.empty()) {
         return false;
     }
 
-    int x = pos.x / 32;
-    int y = pos.y / 32;
+    int x = pos.x;
+    int y = pos.y;
 
     if (x < 0 || x >= int(_map[0][0].size()) || y < 0 || y >= int(_map[0].size())) {
         return false;
     }
 
-    for (auto &i: _cachedMoveRadius) {
+    for (auto &i: radius) {
         if (i._coordinates.x == x && i._coordinates.y == y) {
             return true;
         }
@@ -135,8 +135,8 @@ bool Paths::mouseInRadius(SDL_Point pos) {
     return false;
 }
 
-void Paths::drawMoveRadius(u32 frame) {
-    if(!_cachedMoveRadius.empty()) {
+void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius) {
+    if (!radius.empty()) {
         SDL_Renderer *renderer = RS::getInstance().get();
         SDL_Texture *texture = RS::getInstance().getTexture();
 
@@ -154,7 +154,7 @@ void Paths::drawMoveRadius(u32 frame) {
 
         destRect.w = destRect.h = 16 * 2 - 2;
 
-        for (auto &i: _cachedMoveRadius) {
+        for (auto &i: radius) {
             destRect.x = i._coordinates.x * 16 * 2 + 1;
             destRect.y = i._coordinates.y * 16 * 2 + 1;
             //_offset = (_offset + 1) % 3;
@@ -166,10 +166,11 @@ void Paths::drawMoveRadius(u32 frame) {
 }
 
 
-std::vector<SDL_Point> Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints) {
-    if (!_cachedMoveRadius.empty() && _cachedMoveRadius[0]._coordinates.x == start.x &&
-        _cachedMoveRadius[0]._coordinates.y == start.y) {
-        return nodeToPointVector(_cachedMoveRadius);
+std::vector<Paths::Node>
+Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints, std::vector<Node> &radius) {
+    if (!radius.empty() && radius[0]._coordinates.x == start.x &&
+        radius[0]._coordinates.y == start.y) {
+        return radius;
     }
     std::vector<Node> moveRadius;
     std::vector<std::vector<int>> weightedGraph = getWeightedGraph(movementType);
@@ -193,24 +194,22 @@ std::vector<SDL_Point> Paths::getMoveRadius(SDL_Point start, MovementType moveme
         }
     }
 
-    _cachedMoveRadius = moveRadius;
+    //_cachedMoveRadius = moveRadius;
 
-    return nodeToPointVector(moveRadius);
+    return moveRadius;
 }
 
-std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, MovementType movementType, int actionPoints) {
+std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, std::vector<Node> &radius) {
     std::vector<SDL_Point> path;
-    std::vector<Node> moveRadius = _cachedMoveRadius;
-    Node *currentNode = pointInVector(end, moveRadius);
-
+    Node *currentNode = pointInVector(end, radius);
+    std::cout << "Start" << std::endl;
     if (currentNode == nullptr) {
-        throw std::invalid_argument("End point is not in the move radius");
+        currentNode = pointInVector(_cachedEnd, radius);
     }
-
 
     while (!(currentNode->_coordinates.x == start.x && currentNode->_coordinates.y == start.y)) {
         path.push_back(currentNode->_coordinates);
-        currentNode = pointInVector(currentNode->_parentCoordinates, moveRadius);
+        currentNode = pointInVector(currentNode->_parentCoordinates, radius);
         if (currentNode == nullptr) {
             throw std::invalid_argument("Invalid path: broken parent linkage");
         }
@@ -218,7 +217,7 @@ std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, MovementTy
 
     path.push_back(start);
     //std::reverse(path.begin(), path.end());
-
+    _cachedEnd = path[0];
     return path;
 }
 

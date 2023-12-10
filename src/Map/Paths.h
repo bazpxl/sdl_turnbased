@@ -30,16 +30,18 @@ public:
         int _totalCost;
     };
 
-    std::vector<SDL_Point> getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints);
+    std::vector<Node>
+    getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints, std::vector<Node> &radius);
 
-    std::vector<SDL_Point> getPath(SDL_Point start, SDL_Point end, MovementType movementType, int actionPoints);
+    std::vector<SDL_Point>
+    getPath(SDL_Point start, SDL_Point end, std::vector<Node> &radius);
 
-    bool mouseInRadius(SDL_Point pos);
+    bool mouseInRadius(SDL_Point pos, std::vector<Node> &radius);
 
     //std::vector<SDL_Point> getAttackRadius();
     Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats);
 
-    void drawMoveRadius(u32 frame);
+    void drawMoveRadius(u32 frame, std::vector<Node> &radius);
 
 private:
     const MapStats &_mapStats;
@@ -48,8 +50,9 @@ private:
 
     std::vector<std::vector<std::vector<int>>> _weightedGraphs;
 
-    std::vector<Node> _cachedMoveRadius;
+    //std::vector<Node> _cachedMoveRadius;
 
+    SDL_Point _cachedEnd;
 
     u32 _offset = 0;
 

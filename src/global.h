@@ -280,6 +280,8 @@ inline void SDL_ImGui_Frame( Renderer * renderer, Window * window )
 	*/
 }
 
+
+
 #else
 #define ImGuiOnly( ... ) // nothing
 #endif
