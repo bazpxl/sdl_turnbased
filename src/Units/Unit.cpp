@@ -32,7 +32,7 @@ void Unit::draw() {
             32,
             32
     };
-    if (_finishedTurn) {
+    if (_finishedTurn || _hasMoved) {
         SDL_SetTextureColorMod(_texture, 128, 128, 128);
     }
     SDL_RenderCopyEx(_renderer, _texture, &sourceRect, &destRect, 0, nullptr, _direction);

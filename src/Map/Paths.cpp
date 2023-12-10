@@ -165,6 +165,21 @@ void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius) {
     }
 }
 
+void Paths::drawPath(std::vector<SDL_Point> &path) {
+    SDL_Renderer *renderer = RS::getInstance().get();
+    SDL_Rect destRect;
+    if (!path.empty()) {
+        for (auto &point: path) {
+            destRect.x = point.x * 32 + 8;
+            destRect.y = point.y * 32 + 8;
+            destRect.w = destRect.h = 16;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &destRect);
+
+        }
+    }
+}
+
 
 std::vector<Paths::Node>
 Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints, std::vector<Node> &radius) {

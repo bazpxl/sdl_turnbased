@@ -43,6 +43,8 @@ public:
 
     void drawMoveRadius(u32 frame, std::vector<Node> &radius);
 
+    void drawPath(std::vector<SDL_Point> &path);
+
 private:
     const MapStats &_mapStats;
 
