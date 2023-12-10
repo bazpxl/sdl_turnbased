@@ -13,6 +13,7 @@
 #include <SDL.h>
 #include "Helper/render_singleton.h"
 #include "global.h"
+#include "Helper/enums.h"
 
 
 class Paths {
@@ -44,6 +45,9 @@ public:
     void drawMoveRadius(u32 frame, std::vector<Node> &radius);
 
     void drawPath(std::vector<SDL_Point> &path);
+
+    std::vector<int> _arrowPos;
+
 
 private:
     const MapStats &_mapStats;

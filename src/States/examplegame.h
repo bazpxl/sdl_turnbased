@@ -9,7 +9,6 @@
 #include "Helper/recthelper.h"
 #include "Helper/autocast_ptr.h"
 #include "Helper/render_singleton.h"
-#include "Map/Dijkstra.h"
 #include "player.h"
 #include "Units/Unit.h"
 #include "Helper/map_stat_helper.h"
@@ -36,7 +35,6 @@ public:
 
 class WarState : public ExampleGameState {
 public:
-    PathFinder *pathFinder;
     Paths *paths;
     Player *currentPlayer;
     std::vector<std::vector<std::vector<int>>> map;

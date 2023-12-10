@@ -24,7 +24,6 @@ void WarState::Init() {
 
     initUnitMap();
 
-    pathFinder = new PathFinder(map, MapStats::getInstance(&map));
     paths = new Paths(map, MapStats::getInstance(&map));
 
     loadTileset("asset/graphic/NewTiles.png");
@@ -43,7 +42,6 @@ void WarState::Init() {
 
 void WarState::UnInit() {
     delete (paths);
-    delete (pathFinder);
     SDL_DestroyTexture(texture);
     TTF_CloseFont(indexFont);
 }
@@ -77,6 +75,18 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
     //draw units
     drawUnits();
+    int counter = 0;
+    std::cout << "ArrowPos: " << std::endl;
+    std::cout << paths->_arrowPos.size() << std::endl;
+    for (auto &i : paths->_arrowPos){
+        SDL_Rect destRect;
+        destRect.x = counter * 32;
+        destRect.y = 0;
+        destRect.w = destRect.h =  32;
+        std::cout << i << std::endl;
+        drawTile(i,destRect, 512, 16);
+        counter++;
+    }
 }
 
 /* ##############################################
