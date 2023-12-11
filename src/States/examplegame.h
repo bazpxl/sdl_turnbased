@@ -43,7 +43,7 @@ public:
     // handle unit interaction
     SDL_Point mouseIndex;
     std::vector<std::vector<Unit *>> unitMap;
-    Unit *selected;
+    Unit *selected = nullptr;
     bool mouseDown = false;
     bool sameClick = true;
     std::vector<Paths::Node> radius;

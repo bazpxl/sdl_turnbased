@@ -1,4 +1,5 @@
 #include "Paths.h"
+#include "States/examplegame.h"
 
 void printGraph(const std::vector<std::vector<int>> &graph) {
     for (const auto &row: graph) {
@@ -21,7 +22,7 @@ Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapSta
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::SEA));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TRANSPORT_BOAT));
 
-    _arrowPos = std::vector<int>(21);
+    _arrowPos = std::vector<int>(30);
     _arrowPos[static_cast<int>(AT::LEFT_ARROW)] = 69;
     _arrowPos[static_cast<int>(AT::RIGHT_ARROW)] = 71;
     _arrowPos[static_cast<int>(AT::UP_ARROW)] = 68;
@@ -190,115 +191,93 @@ void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius) {
     }
 }
 
-void Paths::drawPath(std::vector<SDL_Point> &path) {
+void drawTile(int tileIndex, SDL_Rect &destRect, int imgSizeX, int tileSize) {
     SDL_Renderer *renderer = RS::getInstance().get();
     SDL_Texture *texture = RS::getInstance().getTexture();
-    std::vector<int> renderQueue(path.size());
-    if (!path.empty()) {
-        for (size_t i = 0; i < path.size() - 1; i++) {
-            if (i == 0) {
-                if (path[i + 1].x > path[i].x && path[i + 1].y == path[i].y) {
-                    renderQueue.push_back(_arrowPos[static_cast<int>(AT::RIGHT_ARROW)]);
-                } else if (path[i + 1].x < path[i].x && path[i + 1].y == path[i].y) {
-                    renderQueue.push_back(_arrowPos[static_cast<int>(AT::LEFT_ARROW)]);
-                } else if (path[i + 1].x == path[i].x && path[i + 1].y > path[i].y) {
-                    renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_ARROW)]);
-                } else if (path[i + 1].x == path[i].x && path[i + 1].y < path[i].y) {
-                    renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_ARROW)]);
-                }
-            } else if (i == path.size() - 1) {
-                if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
-                    if (path[i].y == path[i + 1].y) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_END_LEFT)]);
-                    } else if (path[i].y < path[i + 1].y) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VERT_UP_LEFT_END)]);
-                    } else if (path[i].y > path[i + 1].y) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VERT_DOWN_LEFT_END)]);
-                    }
-                } else if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
-                    if (path[i].y == path[i + 1].y) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_END_RIGHT)]);
-                    } else if (path[i].y < path[i + 1].y) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VERT_UP_RIGHT_END)]);
-                    } else if (path[i].y > path[i + 1].y) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VERT_DOWN_RIGHT_END)]);
-                    }
-                } else if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Oben (Vorgänger)
-                    if (path[i].x == path[i + 1].x) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_END_DOWN)]);
-                    } else if (path[i].x < path[i + 1].x) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_DOWN_LEFT_END)]);
-                    } else if (path[i].x > path[i + 1].x) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_DOWN_RIGHT_END)]);
-                    }
-                } else if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Unten (Vorgänger)
-                    if (path[i].x == path[i + 1].x) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_END_UP)]);
-                    } else if (path[i].x < path[i + 1].x) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_UP_LEFT_END)]);
-                    } else if (path[i].x > path[i + 1].x) {
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_UP_RIGHT_END)]);
-                    }
-                }
+    int tilesPerRow = imgSizeX / tileSize;
 
-            } else {
-                if (path[i + 1].x > path[i].x &&
-                    path[i + 1].y == path[i].y) { // Rechts vom aktuellen Punkt (Nachfolger)
-                    if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_CONNECT)]);
-                    } else if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Oben (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)]);
-                    } else if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Unten (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)]);
-                    }
-                } else if (path[i + 1].x < path[i].x &&
-                           path[i + 1].y == path[i].y) { // Links vom aktuellen Punkt (Nachfolger)
-                    if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_CONNECT)]);
-                    } else if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Oben (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)]);
-                    } else if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Unten (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)]);
-                    }
-                } else if (path[i + 1].x == path[i].x &&
-                           path[i + 1].y > path[i].y) { // Oben vom aktuellen Punkt (Nachfolger)
-                    if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Unten (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_CONNECT)]);
-                    } else if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)]);
-                    } else if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)]);
-                    }
-                } else if (path[i + 1].x == path[i].x &&
-                           path[i + 1].y < path[i].y) { // Unten vom aktuellen Punkt (Nachfolger)
-                    if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Oben (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_CONNECT)]);
-                    } else if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)]);
-                    } else if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
-                        renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)]);
-                    }
-                }
+    SDL_Rect srcRect;
+    srcRect.w = srcRect.h = tileSize;
+    srcRect.x = (tileIndex % tilesPerRow) * tileSize;
+    srcRect.y = (tileIndex / tilesPerRow) * tileSize;
+
+    destRect.w = destRect.h = 32;
+
+    SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+}
+
+void Paths::drawPath(std::vector<SDL_Point> &path) {
+    if (path.size() < 2) return;
+
+    SDL_Renderer *renderer = RS::getInstance().get();
+    SDL_Texture *texture = RS::getInstance().getTexture();
+    std::vector<int> renderQueue;
+
+    auto addToRenderQueue = [&](int tileIndex) {
+        renderQueue.push_back(tileIndex);
+    };
+
+    // Erste Position (Pfeil)
+    if (path[1].x > path[0].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::LEFT_ARROW)]);
+    else if (path[1].x < path[0].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::RIGHT_ARROW)]);
+    else if (path[1].y > path[0].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::UP_ARROW)]);
+    else if (path[1].y < path[0].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::DOWN_ARROW)]);
+
+    // Zwischenpositionen (Verbindungsstücke)
+    for (size_t i = 1; i < path.size() - 1; i++) {
+
+        if (path[i + 1].x > path[i].x && path[i + 1].y == path[i].y) { // Rechts vom aktuellen Punkt (Nachfolger)
+            if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_CONNECT)]);
+            } else if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Oben (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)]);
+            } else if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Unten (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)]);
+            }
+        } else if (path[i + 1].x < path[i].x &&
+                   path[i + 1].y == path[i].y) { // Links vom aktuellen Punkt (Nachfolger)
+            if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_CONNECT)]);
+            } else if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Oben (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)]);
+            } else if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Unten (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)]);
+            }
+        } else if (path[i + 1].x == path[i].x &&
+                   path[i + 1].y > path[i].y) { // Oben vom aktuellen Punkt (Nachfolger)
+            if (path[i - 1].x == path[i].x && path[i - 1].y < path[i].y) { // Unten (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_CONNECT)]);
+            } else if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)]);
+            } else if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)]);
+            }
+        } else if (path[i + 1].x == path[i].x &&
+                   path[i + 1].y < path[i].y) { // Unten vom aktuellen Punkt (Nachfolger)
+            if (path[i - 1].x == path[i].x && path[i - 1].y > path[i].y) { // Oben (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_CONNECT)]);
+            } else if (path[i - 1].x < path[i].x && path[i - 1].y == path[i].y) { // Links (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)]);
+            } else if (path[i - 1].x > path[i].x && path[i - 1].y == path[i].y) { // Rechts (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)]);
             }
         }
+    }
+    // Letzte Position (Ende)
+    size_t last = path.size() - 1;
+    if (path[last - 1].x > path[last].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::HOR_END_LEFT)]);
+    else if (path[last - 1].x < path[last].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::HOR_END_RIGHT)]);
+    else if (path[last - 1].y > path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_UP)]);
+    else if (path[last - 1].y < path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_DOWN)]);
 
-        int tilesPerRow = 512/32;
-        SDL_Rect srcRect;
+
+
+    for (size_t i = 0; i < renderQueue.size(); i++) {
+        int tileIndex = renderQueue[i];
         SDL_Rect destRect;
-        for (size_t i = 0; i < path.size(); i++) {
-            SDL_Point point = path[i];
-            int tileIndex = renderQueue[i];
-
-            srcRect.x = (tileIndex % tilesPerRow) * 32;
-            srcRect.y = (tileIndex / tilesPerRow) * 32;
-
-            destRect.x = point.x * 32;
-            destRect.y = point.y * 32;
-            destRect.w = destRect.h = 32; // Größe des Quadrats
-
-            // Zeichne die Textur
-            SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
-        }
+        destRect.x = path[i].x * 16 * 2;
+        destRect.y = path[i].y * 16 * 2;
+        drawTile(tileIndex, destRect, 512, 16);
     }
 }
 

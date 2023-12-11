@@ -71,22 +71,12 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
     //draw radius and path
     paths->drawMoveRadius(frame, radius);
+
     paths->drawPath(path);
 
     //draw units
     drawUnits();
-    int counter = 0;
-    std::cout << "ArrowPos: " << std::endl;
-    std::cout << paths->_arrowPos.size() << std::endl;
-    for (auto &i : paths->_arrowPos){
-        SDL_Rect destRect;
-        destRect.x = counter * 32;
-        destRect.y = 0;
-        destRect.w = destRect.h =  32;
-        std::cout << i << std::endl;
-        drawTile(i,destRect, 512, 16);
-        counter++;
-    }
+
 }
 
 /* ##############################################
@@ -239,8 +229,13 @@ void WarState::clearSelectionAndPath() {
 }
 
 void WarState::processUnitSelectionAndMovement(const Event &event) {
-    auto unit = unitMap[mouseIndex.y][mouseIndex.x];
-
+    Unit *unit;
+    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= unitMap[0].size() || mouseIndex.y >= unitMap.size()) {
+        unit = nullptr;
+    } else {
+        unit = unitMap[mouseIndex.y][mouseIndex.x];
+    }
+    //sel = unitMap[2][13];
     if ((mouseDown && unit) || selected) {
         handleUnitInteraction(unit, event);
     } else {
@@ -253,7 +248,7 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
     if (unit && unit->getTeam() == 1 && !unit->hasMoved()) {
         selected = unit;
     }
-    if (unit  && !selected && (unit->getTeam() != 1 || unit->hasMoved())) {
+    if (unit && !selected && (unit->getTeam() != 1 || unit->hasMoved())) {
 
         path.clear();
         radius = paths->getMoveRadius(mouseIndex, unit->getMovementType(), unit->getMoveRange(),
@@ -266,11 +261,12 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
                                       radius);
         path = paths->getPath(selected->getCoordinates(), mouseIndex, radius);
 
-        if (!sameClick && isLeftMouseButtonDown(event) && paths->mouseInRadius(mouseIndex, radius) && mouseIndex != selected->getCoordinates()) {
+        if (!sameClick && isLeftMouseButtonDown(event) && paths->mouseInRadius(mouseIndex, radius) &&
+            mouseIndex != selected->getCoordinates()) {
             unitMap[selected->getCoordinates().y][selected->getCoordinates().x] = nullptr;
             unitMap[mouseIndex.y][mouseIndex.x] = selected;
             selected->setCoordinates(mouseIndex.x, mouseIndex.y);
-            selected->setHasMoved(true);
+            //selected->setHasMoved(true);
             sameClick = true;
             clearSelectionAndPath();
         } else if (isLeftMouseButtonDown(event) && !paths->mouseInRadius(mouseIndex, radius)) {
