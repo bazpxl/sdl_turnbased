@@ -24,13 +24,16 @@ void WarState::Init() {
 
     initUnitMap();
 
-    paths = new Paths(map, MapStats::getInstance(&map));
+    paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
 
     loadTileset("asset/graphic/NewTiles.png");
 
     infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2);
     mechUnit = UnitFactory::createUnit(UnitType::MECH, 1, 8, 2);
     infantryUnit2 = UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1);
+    std::cout <<infantryUnit2->getMoveRange() << std::endl;
+    std::cout <<infantryUnit2->getAttackRange() << std::endl;
+
 
     unitMap[2][13] = infantryUnit2.get();
     unitMap[9][2] = infantryUnit.get();
@@ -70,7 +73,7 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
     drawMap();
 
     //draw radius and path
-    paths->drawMoveRadius(frame, radius);
+    paths->drawMoveRadius(frame, radius, attackRadius);
 
     paths->drawPath(path);
 
@@ -225,6 +228,7 @@ void WarState::handleLeftMouseButtonUp() {
 void WarState::clearSelectionAndPath() {
     path.clear();
     radius.clear();
+    attackRadius.clear();
     selected = nullptr;
 }
 
@@ -251,11 +255,14 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
         path.clear();
         radius = paths->getMoveRadius(mouseIndex, unit->getMovementType(), unit->getMoveRange(), radius);
+        attackRadius = paths->getAttackRadius(mouseIndex, unit->getAttackRange(), radius);
 
     } else if (selected) {
         //radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
-        radius = paths->getMoveRadius(selected->getCoordinates(),MovementType::TIRE_A,10,radius);
+        radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
+        attackRadius = paths->getAttackRadius(selected->getCoordinates(), selected->getAttackRange(), radius);
         path = paths->getPath(selected->getCoordinates(), mouseIndex, radius);
+
 
         if (!sameClick && isLeftMouseButtonDown(event) && paths->mouseInRadius(mouseIndex, radius) &&
             mouseIndex != selected->getCoordinates()) {

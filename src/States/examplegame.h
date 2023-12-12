@@ -43,6 +43,8 @@ public:
     // handle unit interaction
     SDL_Point mouseIndex;
     std::vector<std::vector<Unit *>> unitMap;
+    std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
+
     Unit *selected = nullptr;
     bool mouseDown = false;
     bool sameClick = true;

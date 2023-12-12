@@ -1,7 +1,7 @@
 #include "Unit.h"
 
 Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
-           int attackRange, int fuel,
+           int attackRange, int offset, int fuel,
            int maxFuel, int ammo, int price) :
         _type(type),
         _movementType(movementType),
@@ -11,6 +11,7 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
         _team(team),
         _moveRange(moveRange),
         _attackRange(attackRange),
+        _offset(offset),
         _fuel(fuel),
         _maxFuel(maxFuel),
         _ammo(ammo),
@@ -145,10 +146,10 @@ void Unit::setUnitMap(std::vector<std::vector<Unit*>> *unitMap) {
 }
 
 Infantry::Infantry(int x, int y, int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,
-                                                  team, 3, 1, 99, 99,
+                                                  team, 3, 4,0, 99, 99,
                                                   99, 1000) {}
 
-Mech::Mech(int x, int y, int team) : Unit(UnitType::MECH, MovementType::MECH, x, y, 17 * 16, 6 * 16, team, 2, 1, 70, 70,
+Mech::Mech(int x, int y, int team) : Unit(UnitType::MECH, MovementType::MECH, x, y, 17 * 16, 6 * 16, team, 2, 3,0, 70, 70,
                                           3, 3000) {}
 
 std::unique_ptr<Unit> UnitFactory::createUnit(UnitType type, int x, int y, int team) {

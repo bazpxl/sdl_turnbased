@@ -20,6 +20,7 @@ protected:
     const int _maxHp = 100;
     const int _moveRange;
     const int _attackRange;
+    const int _offset;
     int _fuel;
     const int _maxFuel;
     int _ammo;
@@ -31,7 +32,7 @@ protected:
 
 public:
     Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
-         int attackRange, int fuel,
+         int attackRange,int offset, int fuel,
          int maxFuel, int ammo, int price);
 
     // TODO: Implement showMovementRange
