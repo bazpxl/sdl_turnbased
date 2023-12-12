@@ -12,7 +12,6 @@ void printGraph(const std::vector<std::vector<int>> &graph) {
 
 Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats)
         : _mapStats(mapStats), _map(map) {
-    std::cout << "Creating weighted graphs..." << std::endl;
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::INFANTRY));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::MECH));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TIRE_A));
@@ -67,9 +66,7 @@ const std::vector<std::vector<int>> &Paths::getWeightedGraph(MovementType moveme
 }
 
 std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph) {
-    if (node == nullptr) {
-        throw std::invalid_argument("Node pointer cannot be null.");
-    }
+
     std::vector<Node> neighbors;
     SDL_Point parent = node->_coordinates;
     SDL_Point neighbor;
@@ -209,8 +206,7 @@ void drawTile(int tileIndex, SDL_Rect &destRect, int imgSizeX, int tileSize) {
 void Paths::drawPath(std::vector<SDL_Point> &path) {
     if (path.size() < 2) return;
 
-    SDL_Renderer *renderer = RS::getInstance().get();
-    SDL_Texture *texture = RS::getInstance().getTexture();
+
     std::vector<int> renderQueue;
 
     auto addToRenderQueue = [&](int tileIndex) {
@@ -270,13 +266,11 @@ void Paths::drawPath(std::vector<SDL_Point> &path) {
     else if (path[last - 1].y > path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_UP)]);
     else if (path[last - 1].y < path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_DOWN)]);
 
-
-
     for (size_t i = 0; i < renderQueue.size(); i++) {
         int tileIndex = renderQueue[i];
         SDL_Rect destRect;
-        destRect.x = path[i].x * 16 * 2;
-        destRect.y = path[i].y * 16 * 2;
+        destRect.x = path[i].x * 32;
+        destRect.y = path[i].y * 32;
         drawTile(tileIndex, destRect, 512, 16);
     }
 }
@@ -319,7 +313,6 @@ Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoint
 std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, std::vector<Node> &radius) {
     std::vector<SDL_Point> path;
     Node *currentNode = pointInVector(end, radius);
-    std::cout << "Start" << std::endl;
     if (currentNode == nullptr) {
         currentNode = pointInVector(_cachedEnd, radius);
     }

@@ -235,7 +235,6 @@ void WarState::processUnitSelectionAndMovement(const Event &event) {
     } else {
         unit = unitMap[mouseIndex.y][mouseIndex.x];
     }
-    //sel = unitMap[2][13];
     if ((mouseDown && unit) || selected) {
         handleUnitInteraction(unit, event);
     } else {
@@ -251,14 +250,11 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
     if (unit && !selected && (unit->getTeam() != 1 || unit->hasMoved())) {
 
         path.clear();
-        radius = paths->getMoveRadius(mouseIndex, unit->getMovementType(), unit->getMoveRange(),
-                                      radius);
+        radius = paths->getMoveRadius(mouseIndex, unit->getMovementType(), unit->getMoveRange(), radius);
 
     } else if (selected) {
-        radius = paths->getMoveRadius(selected->getCoordinates(),
-                                      selected->getMovementType(),
-                                      selected->getMoveRange(),
-                                      radius);
+        //radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
+        radius = paths->getMoveRadius(selected->getCoordinates(),MovementType::TIRE_A,10,radius);
         path = paths->getPath(selected->getCoordinates(), mouseIndex, radius);
 
         if (!sameClick && isLeftMouseButtonDown(event) && paths->mouseInRadius(mouseIndex, radius) &&
