@@ -185,7 +185,10 @@ void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius,std::unordered_m
             destRect.x = i._coordinates.x * 16 * 2 + 1;
             destRect.y = i._coordinates.y * 16 * 2 + 1;
             //_offset = (_offset + 1) % 3;
+            SDL_SetTextureColorMod(texture, 255,205,101);
             SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+            SDL_SetTextureColorMod(texture, 255, 255, 255);
+
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(renderer, &destRect);
         }
@@ -193,12 +196,12 @@ void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius,std::unordered_m
             destRect.x = i.first.x * 16 * 2 + 1;
             destRect.y = i.first.y * 16 * 2 + 1;
             if(i.second == 0){
-                SDL_SetTextureColorMod(texture, 255, 0, 0);
+                SDL_SetTextureColorMod(texture, 205,74,49);
                 SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
                 SDL_SetTextureColorMod(texture, 255, 255, 255);
                 SDL_RenderDrawRect(renderer, &destRect);
             }else{
-                SDL_SetTextureColorMod(texture, 128, 0, 255);
+                SDL_SetTextureColorMod(texture, 220,194,166);
                 SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
                 SDL_SetTextureColorMod(texture, 255, 255, 255);
                 SDL_RenderDrawRect(renderer, &destRect);
