@@ -1,6 +1,7 @@
 #include "examplegame.h"
 #include "Units/Unit.h"
 Infantry infantryCost(3,2,3);
+SDL_Rect zurueck;
 void ShopState::Init() {
 	//Infantry InfantryCost = UnitFactory::createUnit(UnitType::INFANTRY, 7, 10, 3);
 
@@ -11,6 +12,15 @@ void ShopState::UnInit() {
 }
 
 bool ShopState::HandleEvent(const Event& event) {
+    SDL_Point mousePos;
+    if (event.type == SDL_MOUSEMOTION) {
+        mousePos.x = event.motion.x;
+        mousePos.y = event.motion.y;
+    }
+    if (SDL_PointInRect(&mousePos, &zurueck)) {
+        game.SetNextState(0);
+    }
+
 	return 0;
 }
 
@@ -26,8 +36,12 @@ void ShopState::Render(const u32 frame, const u32 totalMSec, const float deltaT)
 	SDL_Rect other = SDL_Rect{ 100, 170, 728, 80 };
 	SDL_RenderDrawRect(renderer, &other);
 
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+    zurueck = SDL_Rect{ 828, 50, 30, 30 };
+    SDL_RenderDrawRect(renderer, &zurueck);
 
-    SDL_Surface* imageSurface = IMG_Load(BasePath "asset/graphic/tilesetV3.png");
+
+    SDL_Surface* imageSurface = IMG_Load(BasePath "asset/graphic/NewTiles.png");
     if (!imageSurface) {
         std::cerr << "Failed to load image: " << IMG_GetError() << std::endl;
         return;
@@ -48,8 +62,10 @@ void ShopState::Render(const u32 frame, const u32 totalMSec, const float deltaT)
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, textBuffer, textColor);
 
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-
+    
     SDL_Rect destRect_ = { 200, 110, textSurface->w, textSurface->h };
 
     SDL_RenderCopy(renderer, textTexture, NULL, &destRect_);
+
+
 }

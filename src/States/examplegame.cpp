@@ -32,8 +32,14 @@ bool ExampleGame::HandleEvent(const Event &event) {
                 return true;
             }
 
-            break;
-        }
+			else if (what_key.scancode == SDL_SCANCODE_2)
+			{
+				SetNextState(1);
+				return true;
+			}
+
+			break;
+		}
 
         default:
             break;
