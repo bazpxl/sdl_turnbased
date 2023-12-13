@@ -8,7 +8,8 @@
 
 class Unit {
 protected:
-    static SDL_Texture * _texture;
+    static SDL_Texture *_texture;
+    static std::vector<std::vector<Unit*>> *_unitMap;
     const UnitType _type;
     const MovementType _movementType;
     SDL_Point _coordinates; // Index Position
@@ -19,6 +20,7 @@ protected:
     const int _maxHp = 100;
     const int _moveRange;
     const int _attackRange;
+    const int _offset;
     int _fuel;
     const int _maxFuel;
     int _ammo;
@@ -30,7 +32,7 @@ protected:
 
 public:
     Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
-         int attackRange, int fuel,
+         int attackRange,int offset, int fuel,
          int maxFuel, int ammo, int price);
 
     // TODO: Implement showMovementRange
@@ -42,6 +44,8 @@ public:
 
     static void setTexture(SDL_Texture *texture);
 
+    static void setUnitMap(std::vector<std::vector<Unit*>> *unitMap);
+
     // TODO: Implement specialMove
     //virtual void specialMove() = 0;
 
@@ -52,6 +56,8 @@ public:
     [[nodiscard]] SDL_Point getCoordinates() const;
 
     [[nodiscard]] int getHp() const;
+
+    [[nodiscard]] int getTeam() const;
 
     [[nodiscard]] int getMaxHp() const;
 

@@ -4,12 +4,13 @@
 #include "global.h"
 
 class Player {
+private:
     SDL_Point _pos;
     int _currency;
     int _activeHouses;
     const int _team;
+public:
 
-private:
     Player(int x, int y, int activeHouses,int team, int currency = 1000);
 
     void setPos(const SDL_Point &newPos);

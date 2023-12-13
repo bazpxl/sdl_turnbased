@@ -1,7 +1,7 @@
 #include <limits>
 #include "map_stat_helper.h"
 
-MapStats::MapStats(std::vector<std::vector<std::vector<int>>>* map) : _map(map) {
+MapStats::MapStats(std::vector<std::vector<std::vector<int>>>* map, std::vector<std::vector<Unit *>> *unitMap) : _map(map), _unitMap(unitMap) {
     _movementCosts = {
             {TileType::ROAD,
                     {
@@ -280,8 +280,8 @@ MapStats::MapStats(std::vector<std::vector<std::vector<int>>>* map) : _map(map) 
     };
 }
 
-MapStats &MapStats::getInstance(std::vector<std::vector<std::vector<int>>> *map) {
-    static MapStats instance(map);
+MapStats &MapStats::getInstance(std::vector<std::vector<std::vector<int>>> *map, std::vector<std::vector<Unit *>> *unitMap) {
+    static MapStats instance(map, unitMap);
     return instance;
 }
 
@@ -322,4 +322,20 @@ int MapStats::getMovementCost(int x, int y, MovementType movementType) const {
 int MapStats::getDefense(int x, int y) const {
     TileType tileType = getTileType(x, y);
     return _defense.at(tileType);
+}
+
+int MapStats::inUnitMapAndSameTeam(SDL_Point pos, SDL_Point start) const {
+    auto unit = _unitMap->at(start.y).at(start.x);
+    auto unit2 = _unitMap->at(pos.y).at(pos.x);
+    if (unit == nullptr) {
+        throw std::runtime_error("No unit at start position");
+    }
+    if (unit2 != nullptr) {
+        if (unit->getTeam() == unit2->getTeam()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    return -1;
 }

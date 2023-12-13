@@ -118,7 +118,7 @@ using fmt::print, fmt::println, fmt::format;
 #else
 #ifdef _MSC_VER
 // Definitionen spezifisch für Microsoft Visual C++
-#define BasePath "../../../../"    // out/build/${architecture}-${configuration}
+#define BasePath "../../"    // out/build/${architecture}-${configuration}
 #elif __APPLE__
 // Definitionen spezifisch für Apple-Systeme
 #define BasePath "../../"          // Pfad für Apple-Geräte
@@ -279,6 +279,8 @@ inline void SDL_ImGui_Frame( Renderer * renderer, Window * window )
 	SDL_GL_SwapWindow( window );
 	*/
 }
+
+
 
 #else
 #define ImGuiOnly( ... ) // nothing

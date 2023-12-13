@@ -1,7 +1,7 @@
 #include "Unit.h"
 
 Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
-           int attackRange, int fuel,
+           int attackRange, int offset, int fuel,
            int maxFuel, int ammo, int price) :
         _type(type),
         _movementType(movementType),
@@ -11,11 +11,13 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
         _team(team),
         _moveRange(moveRange),
         _attackRange(attackRange),
+        _offset(offset),
         _fuel(fuel),
         _maxFuel(maxFuel),
         _ammo(ammo),
         _price(price) {
     _renderer = RS::getInstance().get();
+
 }
 
 void Unit::draw() {
@@ -31,8 +33,15 @@ void Unit::draw() {
             32,
             32
     };
-
+    if (_finishedTurn || _hasMoved) {
+        SDL_SetTextureColorMod(_texture, 128, 128, 128);
+    }
     SDL_RenderCopyEx(_renderer, _texture, &sourceRect, &destRect, 0, nullptr, _direction);
+    SDL_SetTextureColorMod(_texture, 255, 255, 255);
+}
+
+int Unit::getTeam() const {
+    return _team;
 }
 
 UnitType Unit::getType() const {
@@ -84,7 +93,6 @@ bool Unit::isFinishedTurn() const {
 }
 
 
-
 void Unit::setFuel(int fuel) {
     _fuel = fuel;
 }
@@ -118,6 +126,11 @@ SDL_Point Unit::getCoordinates() const {
 }
 
 void Unit::setCoordinates(int x, int y) {
+    if (x < _coordinates.x) {
+        _direction = SDL_FLIP_HORIZONTAL;
+    } else if (x > _coordinates.x) {
+        _direction = SDL_FLIP_NONE;
+    }
     _coordinates.x = x;
     _coordinates.y = y;
 }
@@ -127,12 +140,16 @@ SDL_Texture *Unit::_texture = nullptr;
 void Unit::setTexture(SDL_Texture *texture) {
     _texture = texture;
 }
+std::vector<std::vector<Unit*>> *Unit::_unitMap = nullptr;
+void Unit::setUnitMap(std::vector<std::vector<Unit*>> *unitMap) {
+    _unitMap = unitMap;
+}
 
 Infantry::Infantry(int x, int y, int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,
-                                                  team, 3, 1, 99, 99,
+                                                  team, 3, 4,0, 99, 99,
                                                   99, 1000) {}
 
-Mech::Mech(int x, int y, int team) : Unit(UnitType::MECH, MovementType::MECH, x, y, 17 * 16, 6 * 16, team, 2, 1, 70, 70,
+Mech::Mech(int x, int y, int team) : Unit(UnitType::MECH, MovementType::MECH, x, y, 17 * 16, 6 * 16, team, 2, 3,0, 70, 70,
                                           3, 3000) {}
 
 std::unique_ptr<Unit> UnitFactory::createUnit(UnitType type, int x, int y, int team) {
