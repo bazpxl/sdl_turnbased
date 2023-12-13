@@ -7,7 +7,8 @@ ExampleGame::ExampleGame()
 {
 	// Will be freed in Game dtor
 	allStates = {
-        new WarState        (*this, renderer)
+        new WarState        (*this, renderer),
+		new ShopState		(*this, renderer)
 	};
 
 	// The virtual call is ok here

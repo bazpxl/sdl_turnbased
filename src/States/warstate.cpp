@@ -29,8 +29,7 @@ void drawTile(SDL_Renderer *renderer, SDL_Texture *tilesetTexture, int tileIndex
     SDL_RenderCopy(renderer, tilesetTexture, &srcRect, &destRect);
 }
 
-void
-renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, int tileSize = 16, int tilesPerRow = 18,
+void renderTileset(SDL_Renderer *renderer, SDL_Texture *tileset, TTF_Font *font, int tileSize = 16, int tilesPerRow = 18,
               int tilesPerColumn = 12) {
     SDL_Rect srcRect;
     SDL_Rect destRect;
@@ -116,7 +115,9 @@ bool WarState::HandleEvent(const Event &event) {
         mousePos.y = event.motion.y;
     }
 
-
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+        game.SetNextState(1);
+    }
 
 
     if (infantryUnit && paths && paths->mouseInRadius(mousePos)) {

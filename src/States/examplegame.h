@@ -11,6 +11,7 @@
 
 class ExampleGame;
 class WarState;
+class ShopState;
 
 class ExampleGame final : public Game
 {
@@ -44,4 +45,18 @@ public:
     void Render( const u32 frame, const u32 totalMSec, const float deltaT ) override;
 
     Color GetClearColor() const override { return Color { 0, 0, 0, SDL_ALPHA_OPAQUE }; }
+};
+
+class ShopState : public ExampleGameState
+{
+public:
+    // ctor
+    using ExampleGameState::ExampleGameState;
+
+    void Init() override;
+    void UnInit() override;
+
+    bool HandleEvent(const Event& event) override;
+    void Update(const u32 frame, const u32 totalMSec, const float deltaT) override;
+    void Render(const u32 frame, const u32 totalMSec, const float deltaT) override;
 };
