@@ -279,3 +279,14 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
     }
 
 }
+
+void WarState::nextPlayer() {
+        auto it = std::find(players.begin(), players.end(), currentPlayer);
+        if (it != players.end()) {
+            ++it;
+            if (it == players.end()) {
+                it = players.begin();
+            }
+            currentPlayer = *it;
+        }
+}

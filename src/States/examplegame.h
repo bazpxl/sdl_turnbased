@@ -37,6 +37,7 @@ class WarState : public ExampleGameState {
 public:
     Paths *paths;
     Player *currentPlayer;
+    std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
     SDL_Texture *texture;
 
@@ -99,4 +100,6 @@ public:
     void handleUnitInteraction(Unit* unit, const Event &event);
 
     void processUnitSelectionAndMovement(const Event &event);
+
+    void nextPlayer();
 };
