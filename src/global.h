@@ -1,6 +1,5 @@
 #pragma once
 
-
 #define _GLIBC_USE_DEPRECATED 0
 #define _GLIBCXX_USE_DEPRECATED 0
 #define _LIBCPP_ENABLE_DEPRECATION_WARNINGS 2
@@ -97,7 +96,6 @@ template<class T>                                   using SharedPtr = autocast_s
 template<class T>                                   using WeakPtr   = std::weak_ptr<T>;
 
 #include "Helper/autocast_ptr.h"
-
 
 using Clock     = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
@@ -279,8 +277,6 @@ inline void SDL_ImGui_Frame( Renderer * renderer, Window * window )
 	SDL_GL_SwapWindow( window );
 	*/
 }
-
-
 
 #else
 #define ImGuiOnly( ... ) // nothing
