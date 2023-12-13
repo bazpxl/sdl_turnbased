@@ -1,6 +1,7 @@
 #include "Paths.h"
+#include "States/examplegame.h"
 
-void printGraph(const std::vector<std::vector<int>> &graph) {
+[[maybe_unused]] void printGraph(const std::vector<std::vector<int>> &graph) {
     for (const auto &row: graph) {
         for (const auto &cell: row) {
             std::cout << cell << " ";
@@ -16,10 +17,34 @@ Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapSta
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TIRE_A));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TIRE_B));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TREAD));
-    //printGraph(_weightedGraphs[2]);
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::AIR));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::SEA));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::TRANSPORT_BOAT));
+
+    _arrowPos = std::vector<int>(30);
+    _arrowPos[static_cast<int>(AT::LEFT_ARROW)] = 69;
+    _arrowPos[static_cast<int>(AT::RIGHT_ARROW)] = 71;
+    _arrowPos[static_cast<int>(AT::UP_ARROW)] = 68;
+    _arrowPos[static_cast<int>(AT::DOWN_ARROW)] = 132;
+    _arrowPos[static_cast<int>(AT::HOR_END_LEFT)] = 306;
+    _arrowPos[static_cast<int>(AT::HOR_END_RIGHT)] = 338;
+    _arrowPos[static_cast<int>(AT::VER_END_UP)] = 307;
+    _arrowPos[static_cast<int>(AT::VER_END_DOWN)] = 339;
+    _arrowPos[static_cast<int>(AT::HOR_CONNECT)] = 70;
+    _arrowPos[static_cast<int>(AT::VER_CONNECT)] = 100;
+    _arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)] = 101;
+    _arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)] = 102;
+    _arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)] = 133;
+    _arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)] = 134;
+    _arrowPos[static_cast<int>(AT::VERT_UP_RIGHT_END)] = 242;
+    _arrowPos[static_cast<int>(AT::VERT_UP_LEFT_END)] = 243;
+    _arrowPos[static_cast<int>(AT::VERT_DOWN_RIGHT_END)] = 274;
+    _arrowPos[static_cast<int>(AT::VERT_DOWN_LEFT_END)] = 275;
+    _arrowPos[static_cast<int>(AT::HOR_UP_RIGHT_END)] = 210;
+    _arrowPos[static_cast<int>(AT::HOR_UP_LEFT_END)] = 211;
+    _arrowPos[static_cast<int>(AT::HOR_DOWN_RIGHT_END)] = 179;
+    _arrowPos[static_cast<int>(AT::HOR_DOWN_LEFT_END)] = 178;
+
 }
 
 std::vector<std::vector<int>> Paths::convertToWeightedGraph(MovementType movementType) {
@@ -40,10 +65,8 @@ const std::vector<std::vector<int>> &Paths::getWeightedGraph(MovementType moveme
     return _weightedGraphs[static_cast<int>(movementType)];
 }
 
-std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph) {
-    if (node == nullptr) {
-        throw std::invalid_argument("Node pointer cannot be null.");
-    }
+std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph, SDL_Point start) {
+
     std::vector<Node> neighbors;
     SDL_Point parent = node->_coordinates;
     SDL_Point neighbor;
@@ -53,7 +76,7 @@ std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::
     if (validPoint({parent.x - 1, parent.y})) {
         neighbor = {parent.x - 1, parent.y};
         cost = weightedGraph[neighbor.y][neighbor.x];
-        if (cost != std::numeric_limits<int>::max()) {
+        if (cost != std::numeric_limits<int>::max() && _mapStats.inUnitMapAndSameTeam(neighbor, start) == -1) {
             Node neighborNode(neighbor, parent, cost, node->_totalCost + cost);
             neighbors.emplace_back(neighborNode);
         }
@@ -63,7 +86,7 @@ std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::
     if (validPoint({parent.x + 1, parent.y})) {
         neighbor = {parent.x + 1, parent.y};
         cost = weightedGraph[neighbor.y][neighbor.x];
-        if (cost != std::numeric_limits<int>::max()) {
+        if (cost != std::numeric_limits<int>::max() && _mapStats.inUnitMapAndSameTeam(neighbor, start) == -1) {
             Node neighborNode(neighbor, parent, cost, node->_totalCost + cost);
             neighbors.emplace_back(neighborNode);
         }
@@ -73,7 +96,7 @@ std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::
     if (validPoint({parent.x, parent.y - 1})) {
         neighbor = {parent.x, parent.y - 1};
         cost = weightedGraph[neighbor.y][neighbor.x];
-        if (cost != std::numeric_limits<int>::max()) {
+        if (cost != std::numeric_limits<int>::max() && _mapStats.inUnitMapAndSameTeam(neighbor, start) == -1) {
             Node neighborNode(neighbor, parent, cost, node->_totalCost + cost);
             neighbors.emplace_back(neighborNode);
         }
@@ -83,7 +106,7 @@ std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::
     if (validPoint({parent.x, parent.y + 1})) {
         neighbor = {parent.x, parent.y + 1};
         cost = weightedGraph[neighbor.y][neighbor.x];
-        if (cost != std::numeric_limits<int>::max()) {
+        if (cost != std::numeric_limits<int>::max() && _mapStats.inUnitMapAndSameTeam(neighbor, start) == -1) {
             Node neighborNode(neighbor, parent, cost, node->_totalCost + cost);
             neighbors.emplace_back(neighborNode);
         }
@@ -106,7 +129,7 @@ Paths::Node *Paths::pointInVector(const SDL_Point &point, std::vector<Node> &vec
     return nullptr;
 }
 
-std::vector<SDL_Point> Paths::nodeToPointVector(std::vector<Node> &vector) {
+[[maybe_unused]] std::vector<SDL_Point> Paths::nodeToPointVector(std::vector<Node> &vector) {
     std::vector<SDL_Point> points;
     points.reserve(vector.size());
     for (auto &i: vector) {
@@ -115,19 +138,19 @@ std::vector<SDL_Point> Paths::nodeToPointVector(std::vector<Node> &vector) {
     return points;
 }
 
-bool Paths::mouseInRadius(SDL_Point pos) {
-    if (_cachedMoveRadius.empty()) {
+bool Paths::mouseInRadius(SDL_Point pos, std::vector<Node> &radius) {
+    if (radius.empty()) {
         return false;
     }
 
-    int x = pos.x / 32;
-    int y = pos.y / 32;
+    int x = pos.x;
+    int y = pos.y;
 
     if (x < 0 || x >= int(_map[0][0].size()) || y < 0 || y >= int(_map[0].size())) {
         return false;
     }
 
-    for (auto &i: _cachedMoveRadius) {
+    for (auto &i: radius) {
         if (i._coordinates.x == x && i._coordinates.y == y) {
             return true;
         }
@@ -135,39 +158,150 @@ bool Paths::mouseInRadius(SDL_Point pos) {
     return false;
 }
 
-void Paths::drawMoveRadius(u32 frame) {
+void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius,std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> &attackRadius) {
+    if (!radius.empty()) {
+        SDL_Renderer *renderer = RS::getInstance().get();
+        SDL_Texture *texture = RS::getInstance().getTexture();
+        auto _attackRadius = attackRadius;
+
+        SDL_Rect srcRect;
+        SDL_Rect destRect;
+        // 198
+
+
+        _offset = frame / 3 % 16;
+
+
+        srcRect.w = srcRect.h = 32;
+        srcRect.x = int(_offset) * 32;
+        srcRect.y = 176;
+
+        destRect.w = destRect.h = 16 * 2 - 2;
+
+        for (auto &i: radius) {
+            if (_attackRadius.find(i._coordinates) != _attackRadius.end()) {
+                _attackRadius.erase(i._coordinates);
+            }
+            destRect.x = i._coordinates.x * 16 * 2 + 1;
+            destRect.y = i._coordinates.y * 16 * 2 + 1;
+            //_offset = (_offset + 1) % 3;
+            SDL_SetTextureColorMod(texture, 255,205,101);
+            SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+            SDL_SetTextureColorMod(texture, 255, 255, 255);
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderDrawRect(renderer, &destRect);
+        }
+        for(auto &i: _attackRadius){
+            destRect.x = i.first.x * 16 * 2 + 1;
+            destRect.y = i.first.y * 16 * 2 + 1;
+            if(i.second == 0){
+                SDL_SetTextureColorMod(texture, 205,74,49);
+                SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+                SDL_SetTextureColorMod(texture, 255, 255, 255);
+                SDL_RenderDrawRect(renderer, &destRect);
+            }else{
+                SDL_SetTextureColorMod(texture, 220,194,166);
+                SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+                SDL_SetTextureColorMod(texture, 255, 255, 255);
+                SDL_RenderDrawRect(renderer, &destRect);
+            }
+        }
+    }
+}
+
+void drawTile(int tileIndex, SDL_Rect &destRect, int imgSizeX, int tileSize) {
     SDL_Renderer *renderer = RS::getInstance().get();
     SDL_Texture *texture = RS::getInstance().getTexture();
+    int tilesPerRow = imgSizeX / tileSize;
 
     SDL_Rect srcRect;
-    SDL_Rect destRect;
-    // 198
+    srcRect.w = srcRect.h = tileSize;
+    srcRect.x = (tileIndex % tilesPerRow) * tileSize;
+    srcRect.y = (tileIndex / tilesPerRow) * tileSize;
+
+    destRect.w = destRect.h = 32;
+
+    SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
+}
+
+void Paths::drawPath(std::vector<SDL_Point> &path) {
+    if (path.size() < 2) return;
 
 
-    _offset = frame / 3 % 16;
+    std::vector<int> renderQueue;
 
+    auto addToRenderQueue = [&](int tileIndex) {
+        renderQueue.push_back(tileIndex);
+    };
 
-    srcRect.w = srcRect.h = 32;
-    srcRect.x = int(_offset) * 32;
-    srcRect.y = 176;
+    // Erste Position (Pfeil)
+    if (path[1].x > path[0].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::LEFT_ARROW)]);
+    else if (path[1].x < path[0].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::RIGHT_ARROW)]);
+    else if (path[1].y > path[0].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::UP_ARROW)]);
+    else if (path[1].y < path[0].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::DOWN_ARROW)]);
 
-    destRect.w = destRect.h = 16 * 2 - 2;
+    // Zwischenpositionen (Verbindungsstücke)
+    for (size_t i = 1; i < path.size() - 1; i++) {
+        SDL_Point prev = {path[i - 1].x - path[i].x, path[i - 1].y - path[i].y};
+        SDL_Point next = {path[i + 1].x - path[i].x, path[i + 1].y - path[i].y};
+        // 1 = rechts,unten, -1 = links,oben
+        if (next.x == 1) { // Rechts vom aktuellen Punkt (Nachfolger)
+            if (prev.x == -1) { // Links (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_CONNECT)]);
+            } else if (prev.y == -1) { // Oben (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)]);
+            } else if (prev.y == 1) { // Unten (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)]);
+            }
+        } else if (next.x == -1) { // Links vom aktuellen Punkt (Nachfolger)
+            if (prev.x == 1) { // Rechts (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::HOR_CONNECT)]);
+            } else if (prev.y == -1) { // Oben (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)]);
+            } else if (prev.y == 1) { // Unten (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)]);
+            }
+        } else if (next.y == -1) { // Oben vom aktuellen Punkt (Nachfolger)
+            if (prev.y == 1) { // Unten (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_CONNECT)]);
+            } else if (prev.x == -1) { // Links (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_LEFT_CONNECT)]);
+            } else if (prev.x == 1) { // Rechts (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::DOWN_RIGHT_CONNECT)]);
+            }
+        } else if (next.y == 1) { // Unten vom aktuellen Punkt (Nachfolger)
+            if (prev.y == -1) { // Oben (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::VER_CONNECT)]);
+            } else if (prev.x == -1) { // Links (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_LEFT_CONNECT)]);
+            } else if (prev.x == 1) { // Rechts (Vorgänger)
+                renderQueue.push_back(_arrowPos[static_cast<int>(AT::UP_RIGHT_CONNECT)]);
+            }
+        }
+    }
+    // Letzte Position (Ende)
+    size_t last = path.size() - 1;
+    if (path[last - 1].x > path[last].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::HOR_END_LEFT)]);
+    else if (path[last - 1].x < path[last].x) addToRenderQueue(_arrowPos[static_cast<int>(AT::HOR_END_RIGHT)]);
+    else if (path[last - 1].y > path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_UP)]);
+    else if (path[last - 1].y < path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_DOWN)]);
 
-    for (auto &i: _cachedMoveRadius) {
-        destRect.x = i._coordinates.x * 16 * 2 + 1;
-        destRect.y = i._coordinates.y * 16 * 2 + 1;
-        //_offset = (_offset + 1) % 3;
-        SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderDrawRect(renderer, &destRect);
+    for (size_t i = 0; i < renderQueue.size(); i++) {
+        int tileIndex = renderQueue[i];
+        SDL_Rect destRect;
+        destRect.x = path[i].x * 32;
+        destRect.y = path[i].y * 32;
+        drawTile(tileIndex, destRect, 512, 16);
     }
 }
 
 
-std::vector<SDL_Point> Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints) {
-    if (!_cachedMoveRadius.empty() && _cachedMoveRadius[0]._coordinates.x == start.x &&
-        _cachedMoveRadius[0]._coordinates.y == start.y) {
-        return nodeToPointVector(_cachedMoveRadius);
+std::vector<Paths::Node>
+Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints, std::vector<Node> &radius) {
+    if (!radius.empty() && radius[0]._coordinates.x == start.x &&
+        radius[0]._coordinates.y == start.y) {
+        return radius;
     }
     std::vector<Node> moveRadius;
     std::vector<std::vector<int>> weightedGraph = getWeightedGraph(movementType);
@@ -182,33 +316,31 @@ std::vector<SDL_Point> Paths::getMoveRadius(SDL_Point start, MovementType moveme
         queue.pop();
 
 
-        std::vector<Node> neighbors = getNeighbors(&node, weightedGraph);
+        std::vector<Node> neighbors = getNeighbors(&node, weightedGraph, start);
         for (Node neighbor: neighbors) {
-            if (neighbor._totalCost <= actionPoints && pointInVector(neighbor._coordinates, moveRadius) == nullptr) {
+            if (neighbor._totalCost <= actionPoints &&
+                pointInVector(neighbor._coordinates, moveRadius) == nullptr) {
                 moveRadius.push_back(neighbor);
                 queue.emplace(neighbor);
             }
         }
     }
 
-    _cachedMoveRadius = moveRadius;
+    //_cachedMoveRadius = moveRadius;
 
-    return nodeToPointVector(moveRadius);
+    return moveRadius;
 }
 
-std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, MovementType movementType, int actionPoints) {
+std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, std::vector<Node> &radius) {
     std::vector<SDL_Point> path;
-    std::vector<Node> moveRadius = _cachedMoveRadius;
-    Node *currentNode = pointInVector(end, moveRadius);
-
+    Node *currentNode = pointInVector(end, radius);
     if (currentNode == nullptr) {
-        throw std::invalid_argument("End point is not in the move radius");
+        currentNode = pointInVector(_cachedEnd, radius);
     }
-
 
     while (!(currentNode->_coordinates.x == start.x && currentNode->_coordinates.y == start.y)) {
         path.push_back(currentNode->_coordinates);
-        currentNode = pointInVector(currentNode->_parentCoordinates, moveRadius);
+        currentNode = pointInVector(currentNode->_parentCoordinates, radius);
         if (currentNode == nullptr) {
             throw std::invalid_argument("Invalid path: broken parent linkage");
         }
@@ -216,7 +348,34 @@ std::vector<SDL_Point> Paths::getPath(SDL_Point start, SDL_Point end, MovementTy
 
     path.push_back(start);
     //std::reverse(path.begin(), path.end());
-
+    _cachedEnd = path[0];
     return path;
 }
+
+
+std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> Paths::getAttackRadius(SDL_Point start, int range, std::vector<Node> &radius) {
+    std::unordered_set<SDL_Point, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadiusSet;
+    std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
+
+    for (auto &node: radius) {
+        if (std::abs(node._coordinates.x - start.x) + std::abs(node._coordinates.y - start.y) <= range) {
+            std::vector<SDL_Point> neighbors = {
+                    {node._coordinates.x - 1, node._coordinates.y},
+                    {node._coordinates.x + 1, node._coordinates.y},
+                    {node._coordinates.x,     node._coordinates.y - 1},
+                    {node._coordinates.x,     node._coordinates.y + 1}
+            };
+
+            for (auto &neighbor: neighbors) {
+                if (validPoint(neighbor) && attackRadiusSet.find(neighbor) == attackRadiusSet.end()) {
+                    attackRadiusSet.insert(neighbor);
+                    _mapStats.inUnitMapAndSameTeam(neighbor, start) == 1 ? attackRadius[neighbor] = 1 : _mapStats.inUnitMapAndSameTeam(neighbor, start) == 0 ? attackRadius[neighbor] = 0 : attackRadius[neighbor] = -1;
+                }
+            }
+        }
+    }
+
+    return attackRadius;
+}
+
 

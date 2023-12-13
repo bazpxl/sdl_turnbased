@@ -1,6 +1,6 @@
 #include "player.h"
 
-Player::Player(int x, int y, int actHouses, int playerTeam, int curr): pos{x,y}, currency{curr}, activeHouses{actHouses}, team{playerTeam} {}
+Player::Player(int x, int y, int actHouses, int playerTeam, int curr): _pos{x,y}, _currency{curr}, _activeHouses{actHouses}, _team{playerTeam} {}
 
 void Player::setPos(const SDL_Point& newPos) {
     _pos = newPos;

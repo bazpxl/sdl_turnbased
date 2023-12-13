@@ -13,6 +13,7 @@
 #include <SDL.h>
 #include "Helper/render_singleton.h"
 #include "global.h"
+#include "Helper/enums.h"
 
 
 class Paths {
@@ -29,17 +30,38 @@ public:
         int _cost;
         int _totalCost;
     };
+    struct SDLPointHash {
+        std::size_t operator()(const SDL_Point &point) const {
+            return std::hash<int>()(point.x) ^ (std::hash<int>()(point.y) << 1);
+        }
+    };
 
-    std::vector<SDL_Point> getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints);
+    struct SDLPointEqual {
+        bool operator()(const SDL_Point &a, const SDL_Point &b) const {
+            return a.x == b.x && a.y == b.y;
+        }
+    };
 
-    std::vector<SDL_Point> getPath(SDL_Point start, SDL_Point end, MovementType movementType, int actionPoints);
+    std::vector<Node>
+    getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints, std::vector<Node> &radius);
 
-    bool mouseInRadius(SDL_Point pos);
+    std::vector<SDL_Point>
+    getPath(SDL_Point start, SDL_Point end, std::vector<Node> &radius);
 
-    //std::vector<SDL_Point> getAttackRadius();
+    std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> getAttackRadius(SDL_Point start, int range, std::vector<Node> &radius);
+
+    bool mouseInRadius(SDL_Point pos, std::vector<Node> &radius);
+
     Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats);
 
-    void drawMoveRadius(u32 frame);
+    void drawMoveRadius(u32 frame, std::vector<Node> &radius, std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> &attackRadius);
+
+    void drawPath(std::vector<SDL_Point> &path);
+
+    std::vector<int> _arrowPos;
+
+
+    bool validPoint(const SDL_Point &point);
 
 private:
     const MapStats &_mapStats;
@@ -48,8 +70,9 @@ private:
 
     std::vector<std::vector<std::vector<int>>> _weightedGraphs;
 
-    std::vector<Node> _cachedMoveRadius;
+    //std::vector<Node> _cachedMoveRadius;
 
+    SDL_Point _cachedEnd;
 
     u32 _offset = 0;
 
@@ -57,13 +80,11 @@ private:
 
     [[nodiscard]] const std::vector<std::vector<int>> &getWeightedGraph(MovementType movementType) const;
 
-    std::vector<Node> getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph);
-
-    bool validPoint(const SDL_Point &point);
+    std::vector<Node> getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph, SDL_Point start);
 
     static Node *pointInVector(const SDL_Point &point, std::vector<Node> &vector);
 
-    static std::vector<SDL_Point> nodeToPointVector(std::vector<Node> &vector);
+    [[maybe_unused]] static std::vector<SDL_Point> nodeToPointVector(std::vector<Node> &vector);
 
 };
 
