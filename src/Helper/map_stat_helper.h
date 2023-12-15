@@ -21,8 +21,8 @@ public:
 
 private:
     explicit MapStats(std::vector<std::vector<std::vector<int>>> *map, std::vector<std::vector<Unit *>> *unitMap);
-    std::vector<std::vector<Unit *>> *_unitMap;
     std::vector<std::vector<std::vector<int>>> *_map;
+    std::vector<std::vector<Unit *>> *_unitMap;
     std::unordered_map<TileType, std::map<MovementType, int>> _movementCosts;
     std::unordered_map<TileType, int> _defense;
     std::unordered_map<int, TileType> _indexTileTypeMapping;

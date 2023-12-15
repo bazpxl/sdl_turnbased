@@ -1,3 +1,4 @@
+
 #pragma once
 
 #define _GLIBC_USE_DEPRECATED 0
@@ -122,7 +123,7 @@ using fmt::print, fmt::println, fmt::format;
 #define BasePath "../../"          // Pfad für Apple-Geräte
 #else
 // Definitionen für andere Compiler und Systeme
-#define BasePath "../../../../"    // Standard-Definition für andere Systeme
+#define BasePath "../../"    // Standard-Definition für andere Systeme
 #endif
 #endif
 

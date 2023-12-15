@@ -234,7 +234,7 @@ void WarState::clearSelectionAndPath() {
 
 void WarState::processUnitSelectionAndMovement(const Event &event) {
     Unit *unit;
-    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= unitMap[0].size() || mouseIndex.y >= unitMap.size()) {
+    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= int(unitMap[0].size()) || mouseIndex.y >= int(unitMap.size())) {
         unit = nullptr;
     } else {
         unit = unitMap[mouseIndex.y][mouseIndex.x];
