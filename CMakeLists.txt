@@ -198,6 +198,7 @@ add_executable( sdl_basegame
         src/player.cpp
         src/Units/CombatCalculator.cpp
         src/Units/CombatCalculator.h
+        src/Units/CombatCalculator.h
         src/Units/CombatCalculator.h)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
