@@ -20,17 +20,17 @@ enum class UnitType {
     MEDIUM_TANK,
     APC,
     ARTILLERY,
-    ROCKETS,
+    ROCKET,
     ANTI_AIR,
-    MISSILES,
-    B_COPTER,
-    T_COPTER,
+    MISSILE,
+    BATTLE_COPTER,
+    TRANSPORT_COPTER,
     FIGHTER,
     BOMBER,
-    BATTLESHIP,
-    CRUISER,
     LANDER,
-    SUBMARINE
+    CRUISER,
+    SUBMARINE,
+    BATTLESHIP
 };
 
 enum class TileType {

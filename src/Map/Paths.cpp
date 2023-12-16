@@ -10,7 +10,7 @@
     }
 }
 
-Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats)
+Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapStats &mapStats) // NOLINT(*-pro-type-member-init)
         : _mapStats(mapStats), _map(map) {
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::INFANTRY));
     _weightedGraphs.emplace_back(convertToWeightedGraph(MovementType::MECH));
@@ -47,13 +47,13 @@ Paths::Paths(const std::vector<std::vector<std::vector<int>>> &map, const MapSta
 
 }
 
-std::vector<std::vector<int>> Paths::convertToWeightedGraph(MovementType movementType) {
+std::vector<std::vector<int>> Paths::convertToWeightedGraph(const MovementType movementType) const {
     std::vector<std::vector<int>> weightedGraph;
-    for (int y = 0; y < int(_map[0].size()); y++) {
+    for (int y = 0; y < static_cast<int>(_map[0].size()); y++) {
         std::vector<int> row;
-        row.reserve(int(_map[0][y].size()));
-        for (int x = 0; x < int(_map[0][y].size()); x++) {
-            row.push_back(_mapStats.getMovementCost(x, y, movementType));
+        row.reserve(static_cast<int>(_map[0][y].size()));
+        for (int x = 0; x < static_cast<int>(_map[0][y].size()); x++) {
+            row.push_back(_mapStats.getMovementCost({x, y}, movementType));
         }
         weightedGraph.push_back(row);
     }
@@ -65,10 +65,10 @@ const std::vector<std::vector<int>> &Paths::getWeightedGraph(MovementType moveme
     return _weightedGraphs[static_cast<int>(movementType)];
 }
 
-std::vector<Paths::Node> Paths::getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph, SDL_Point start) {
+std::vector<Paths::Node> Paths::getNeighbors(const Node *node, const std::vector<std::vector<int>> &weightedGraph, const SDL_Point start) {
 
     std::vector<Node> neighbors;
-    SDL_Point parent = node->_coordinates;
+    const SDL_Point parent = node->_coordinates;
     SDL_Point neighbor;
     int cost;
 
@@ -150,7 +150,7 @@ bool Paths::mouseInRadius(SDL_Point pos, std::vector<Node> &radius) {
         return false;
     }
 
-    for (auto &i: radius) {
+    for (const auto &i: radius) {
         if (i._coordinates.x == x && i._coordinates.y == y) {
             return true;
         }
@@ -288,7 +288,7 @@ void Paths::drawPath(std::vector<SDL_Point> &path) {
     else if (path[last - 1].y < path[last].y) addToRenderQueue(_arrowPos[static_cast<int>(AT::VER_END_DOWN)]);
 
     for (size_t i = 0; i < renderQueue.size(); i++) {
-        int tileIndex = renderQueue[i];
+        const int tileIndex = renderQueue[i];
         SDL_Rect destRect;
         destRect.x = path[i].x * 32;
         destRect.y = path[i].y * 32;
@@ -298,13 +298,13 @@ void Paths::drawPath(std::vector<SDL_Point> &path) {
 
 
 std::vector<Paths::Node>
-Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoints, std::vector<Node> &radius) {
+Paths::getMoveRadius(const SDL_Point start, const MovementType movementType, const int actionPoints, std::vector<Node> &radius) {
     if (!radius.empty() && radius[0]._coordinates.x == start.x &&
         radius[0]._coordinates.y == start.y) {
         return radius;
     }
     std::vector<Node> moveRadius;
-    std::vector<std::vector<int>> weightedGraph = getWeightedGraph(movementType);
+    const std::vector<std::vector<int>> weightedGraph = getWeightedGraph(movementType);
     std::priority_queue<Node, std::vector<Node>, std::greater<>> queue;
 
     Node startNode(start, start, 0, 0);
@@ -316,8 +316,7 @@ Paths::getMoveRadius(SDL_Point start, MovementType movementType, int actionPoint
         queue.pop();
 
 
-        std::vector<Node> neighbors = getNeighbors(&node, weightedGraph, start);
-        for (Node neighbor: neighbors) {
+        for (std::vector<Node> neighbors = getNeighbors(&node, weightedGraph, start); Node neighbor: neighbors) {
             if (neighbor._totalCost <= actionPoints &&
                 pointInVector(neighbor._coordinates, moveRadius) == nullptr) {
                 moveRadius.push_back(neighbor);

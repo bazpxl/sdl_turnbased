@@ -13,6 +13,7 @@
 #include "Units/Unit.h"
 #include "Helper/map_stat_helper.h"
 #include "Map/Paths.h"
+#include "Units/CombatCalculator.h"
 
 
 class ExampleGame;
@@ -40,10 +41,12 @@ public:
     std::vector<std::vector<std::vector<int>>> map;
     SDL_Texture *texture;
 
+
     // handle unit interaction
     SDL_Point mouseIndex;
     std::vector<std::vector<Unit *>> unitMap;
     std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
+    CombatCalculator * cc;
 
     Unit *selected = nullptr;
     bool mouseDown = false;

@@ -19,9 +19,9 @@
 class Paths {
 public:
     struct Node {
-        Node(SDL_Point point, SDL_Point parent, int cost, int totalCost) : _coordinates(point),
-                                                                           _parentCoordinates(parent), _cost(cost),
-                                                                           _totalCost(totalCost) {};
+        Node(const SDL_Point point, const SDL_Point parent, const int cost, const int totalCost) : _coordinates(point),
+                                                                                                   _parentCoordinates(parent), _cost(cost),
+                                                                                                   _totalCost(totalCost) {};
 
         bool operator>(const Node &other) const { return _totalCost > other._totalCost; }
 
@@ -76,11 +76,11 @@ private:
 
     u32 _offset = 0;
 
-    std::vector<std::vector<int>> convertToWeightedGraph(MovementType movementType);
+    std::vector<std::vector<int>> convertToWeightedGraph(MovementType movementType) const;
 
     [[nodiscard]] const std::vector<std::vector<int>> &getWeightedGraph(MovementType movementType) const;
 
-    std::vector<Node> getNeighbors(Node *node, const std::vector<std::vector<int>> &weightedGraph, SDL_Point start);
+    std::vector<Node> getNeighbors(const Node *node, const std::vector<std::vector<int>> &weightedGraph, SDL_Point start);
 
     static Node *pointInVector(const SDL_Point &point, std::vector<Node> &vector);
 

@@ -26,6 +26,8 @@ void WarState::Init() {
 
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
 
+    cc = new CombatCalculator(MapStats::getInstance(&map, &unitMap));
+
     loadTileset("asset/graphic/NewTiles.png");
 
     infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2);
@@ -41,6 +43,8 @@ void WarState::Init() {
 
     // Kann ggf weg
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+
+    std::cout << cc->calculateDamage(*infantryUnit, *infantryUnit2) << std::endl;
 }
 
 void WarState::UnInit() {

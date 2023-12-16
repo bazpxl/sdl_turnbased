@@ -2,7 +2,7 @@
 
 Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
            int attackRange, int offset, int fuel,
-           int maxFuel, int ammo, int price) :
+           int maxFuel, int ammo, int price, bool canAttack) :
         _type(type),
         _movementType(movementType),
         _coordinates({x, y}),
@@ -15,7 +15,8 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
         _fuel(fuel),
         _maxFuel(maxFuel),
         _ammo(ammo),
-        _price(price) {
+        _price(price),
+        _canAttack(canAttack){
     _renderer = RS::getInstance().get();
 
 }
