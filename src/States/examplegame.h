@@ -35,10 +35,14 @@ public:
 
 class WarState : public ExampleGameState {
 public:
-    Paths *paths;
+
+	TTF_Font *_indexFont;
+	Paths *paths;
     Player *currentPlayer;
     std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
+	std::vector<SDL_Texture*>_panelFontTextures;
+	SDL_Texture *_panelTexture;
     SDL_Texture *texture;
 
     // handle unit interaction
@@ -83,6 +87,8 @@ public:
     void drawMap();
 
     void drawUnits();
+
+	void drawInterface();
 
     // Event Handling
     void updateMouseIndex(const Event &event);

@@ -1,6 +1,6 @@
 #include "examplegame.h"
 
-TTF_Font *indexFont;
+
 
 std::unique_ptr<Unit> infantryUnit;
 std::unique_ptr<Unit> mechUnit;
@@ -34,19 +34,43 @@ void WarState::Init() {
     std::cout <<infantryUnit2->getMoveRange() << std::endl;
     std::cout <<infantryUnit2->getAttackRange() << std::endl;
 
+	players.push_back(new Player(20,20,4,1));
+	players.push_back(new Player(20,20,4,2));
+	currentPlayer = players[0];
 
     unitMap[2][13] = infantryUnit2.get();
     unitMap[9][2] = infantryUnit.get();
     unitMap[8][1] = mechUnit.get();
 
+	_panelTexture = IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png");
+	if (!_panelTexture) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
+
     // Kann ggf weg
-    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+    _indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+
+	SDL_FreeSurface(textSurface);
 }
 
 void WarState::UnInit() {
     delete (paths);
     SDL_DestroyTexture(texture);
-    TTF_CloseFont(indexFont);
+	for(auto txt : _panelFontTextures){
+		SDL_DestroyTexture(txt);
+	}
+    TTF_CloseFont(_indexFont);
 }
 
 bool WarState::HandleEvent(const Event &event) {
@@ -61,6 +85,14 @@ bool WarState::HandleEvent(const Event &event) {
     }
 
     processUnitSelectionAndMovement(event);
+
+	if (event.type == SDL_KEYDOWN){
+		const Keysym &what_key = event.key.keysym;
+		if(what_key.scancode == SDL_SCANCODE_SPACE){
+			nextPlayer();
+		}
+	}
+
     return false;
 }
 
@@ -79,6 +111,8 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
     //draw units
     drawUnits();
+
+	drawInterface();
 
 }
 
@@ -289,4 +323,38 @@ void WarState::nextPlayer() {
             }
             currentPlayer = *it;
         }
+}
+
+void WarState::drawInterface()
+{
+	// draw InfoPanel
+	// ----------------------------------------------------------------
+	const SDL_Point & winSize = game.GetWindowSize();
+	SDL_Rect destRect = {0, winSize.y - 50,winSize.x, 50};
+	SDL_RenderCopy( renderer, _panelTexture, EntireRect, &destRect);
+
+	destRect = {0, winSize.y - 50,50, 50};
+	SDL_RenderCopy( renderer, _panelTexture, EntireRect, &destRect);
+
+
+	SDL_Point mousePos;
+	SDL_GetMouseState(&mousePos.x, &mousePos.y);
+
+	int defense = 0;
+	if( ((mousePos.x / 32) >= 0 ) && ((mousePos.y / 32) >= 0)){
+		defense = MapStats::getInstance(&map, &unitMap).getDefense( mousePos.x / 32, mousePos.y / 32);
+	}
+
+	destRect = {10, winSize.y - 50, 30,20};
+	SDL_RenderCopy( renderer, _panelFontTextures[defense], EntireRect, &destRect);
+
+	SDL_Color blue = {0,0,150};
+	SDL_Color red = {150,0,0};
+
+	SDL_Color clr = (currentPlayer->getTeam() == 1) ? blue : red;
+	SDL_Rect emblemRect = {60, winSize.y-40, 25,25};
+
+	SDL_SetRenderDrawColor(renderer,clr.r,clr.g, clr.b, 0);
+	SDL_RenderFillRect(renderer, &emblemRect);
+	//--------------------------------------------------------------------
 }
