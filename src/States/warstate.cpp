@@ -22,7 +22,10 @@ void WarState::Init() {
     map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
     map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
 
+
     initUnitMap();
+
+
 
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
 
@@ -71,6 +74,9 @@ void WarState::UnInit() {
     delete (paths);
     SDL_DestroyTexture(texture);
 	for(auto txt : _panelFontTextures){
+		SDL_DestroyTexture(txt);
+	}
+	for(auto txt: _panelTextures){
 		SDL_DestroyTexture(txt);
 	}
     TTF_CloseFont(_indexFont);
@@ -330,49 +336,75 @@ void WarState::nextPlayer() {
 
 void WarState::drawInterface()
 {
-	// draw InfoPanel
-	// ----------------------------------------------------------------
-	const SDL_Point & winSize = game.GetWindowSize();
-	SDL_Rect destRect = {winSize.x - 100, winSize.y - 50,150, 150};
-	SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect);
+	if(mouseIndex.y < 10){// draw InfoPanel
+		// ----------------------------------------------------------------
+		const SDL_Point & winSize = game.GetWindowSize();
+
+		// draw right panel for playerinfo
+		SDL_Rect destRect = { winSize.x / 32, winSize.y - 32, winSize.x, 32 };
+		SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
+
+		// draw left panel for tileinfo
+		destRect = { 0, winSize.y - 32, 50, 32 };
+		SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
 
 
+		if( (mouseIndex.x >= 0 && mouseIndex.y >= 0) )
+		{
+			// get defense value
+			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( mouseIndex.x, mouseIndex.y );
 
-	destRect = {0, winSize.y - 50,50, 50};
-	SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect);
+			// render tile
+			destRect = { 6, winSize.y - 32, 32, 32 };
+			if( map[1][mouseIndex.y][mouseIndex.x] >= 0 )
+			{
+				drawTile( map[1][mouseIndex.y][mouseIndex.x], destRect, 512 );
+			}
+			else
+			{
+				drawTile( 1, destRect, 512 );
+			}
 
 
-	SDL_Point mousePos;
-	SDL_GetMouseState(&mousePos.x, &mousePos.y);
+			// render defense value
+			// -------------------------------------------------------------
+			destRect.x += 37;
+			SDL_RenderCopy( renderer, _panelFontTextures[defense], EntireRect, &destRect );
 
-	int defense = 0;
-	if( ((mousePos.x / 32) >= 0 ) && ((mousePos.y / 32) >= 0)){
-		defense = MapStats::getInstance(&map, &unitMap).getDefense( mousePos.x / 32, mousePos.y / 32);
+			// Set render-color for team-emblem
+			// -------------------------------------------------------------
+			if( currentPlayer->getTeam() == 1 )
+			{
+				SDL_SetRenderDrawColor( renderer, 30, 30, 155, 0 );
+			}
+			else
+			{
+				SDL_SetRenderDrawColor( renderer, 155, 30, 30, 0 );
+			}
+
+			// Render team-emblem
+			// --------------------------------------------------------------
+			SDL_Rect emblemRect = { winSize.x - 35, winSize.y - 28, 27, 27 };
+			SDL_RenderFillRect( renderer, &emblemRect );
+
+			// Render Coin
+			// --------------------------------------------------------------
+			destRect = { winSize.x - 96, winSize.y - 26, 32, 32 };
+			SDL_RenderCopy( renderer, _panelTextures[1], EntireRect, &destRect );
+
+			// Create TTF-font surface and render currency-val
+			// ---------------------------------------------------------------
+			std::string currency = std::to_string( currentPlayer->getCurrency() );
+			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 } );
+			SDL_Texture * curTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
+
+			destRect = { winSize.x - 74, winSize.y - 32, 32, 32 };
+			SDL_RenderCopy( renderer, curTexture, EntireRect, &destRect );
+
+			SDL_FreeSurface( textSurface );
+			SDL_DestroyTexture( curTexture );
+
+			//--------------------------------------------------------------------
+		}
 	}
-
-	destRect = {10, winSize.y - 50, 30,20};
-	SDL_RenderCopy( renderer, _panelFontTextures[defense], EntireRect, &destRect);
-
-	SDL_Color blue = {0,0,150};
-	SDL_Color red = {150,0,0};
-	SDL_Color clr = (currentPlayer->getTeam() == 1) ? blue : red;
-	SDL_SetRenderDrawColor(renderer, clr.r, clr.g, clr.b, 0);
-
-	SDL_Rect emblemRect = {winSize.x - 35, winSize.y-40, 31,31};
-	SDL_RenderFillRect(renderer, &emblemRect);
-
-	// Render Coin
-	destRect = {winSize.x - 98 ,winSize.y-32, 30,30};
-	SDL_RenderCopy(renderer, _panelTextures[1], EntireRect, &destRect);
-
-	std::string currency = std::to_string(currentPlayer->getCurrency());
-	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0});
-	SDL_Texture* curTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-	destRect = {winSize.x - 78 ,winSize.y-36, 30,26};
-	SDL_RenderCopy(renderer, curTexture, EntireRect, &destRect);
-
-	SDL_FreeSurface(textSurface);
-	SDL_DestroyTexture(curTexture);
-	//--------------------------------------------------------------------
 }
