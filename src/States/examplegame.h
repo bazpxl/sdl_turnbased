@@ -42,7 +42,7 @@ public:
     std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
 	std::vector<SDL_Texture*>_panelFontTextures;
-	SDL_Texture *_panelTexture;
+	std::vector<SDL_Texture*>_panelTextures;
     SDL_Texture *texture;
 
     // handle unit interaction

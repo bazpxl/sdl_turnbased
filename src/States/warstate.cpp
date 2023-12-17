@@ -42,11 +42,14 @@ void WarState::Init() {
     unitMap[9][2] = infantryUnit.get();
     unitMap[8][1] = mechUnit.get();
 
-	_panelTexture = IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png");
-	if (!_panelTexture) {
+	_panelTextures.push_back(IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png"));
+	if (!_panelTextures[0]) {
 		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
 	}
-
+	_panelTextures.push_back((IMG_LoadTexture(renderer, BasePath"asset/graphic/coin.png")));
+	if (!_panelTextures[1]) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
     // Kann ggf weg
     _indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 
@@ -330,11 +333,13 @@ void WarState::drawInterface()
 	// draw InfoPanel
 	// ----------------------------------------------------------------
 	const SDL_Point & winSize = game.GetWindowSize();
-	SDL_Rect destRect = {0, winSize.y - 50,winSize.x, 50};
-	SDL_RenderCopy( renderer, _panelTexture, EntireRect, &destRect);
+	SDL_Rect destRect = {winSize.x - 100, winSize.y - 50,150, 150};
+	SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect);
+
+
 
 	destRect = {0, winSize.y - 50,50, 50};
-	SDL_RenderCopy( renderer, _panelTexture, EntireRect, &destRect);
+	SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect);
 
 
 	SDL_Point mousePos;
@@ -350,11 +355,24 @@ void WarState::drawInterface()
 
 	SDL_Color blue = {0,0,150};
 	SDL_Color red = {150,0,0};
-
 	SDL_Color clr = (currentPlayer->getTeam() == 1) ? blue : red;
-	SDL_Rect emblemRect = {60, winSize.y-40, 25,25};
+	SDL_SetRenderDrawColor(renderer, clr.r, clr.g, clr.b, 0);
 
-	SDL_SetRenderDrawColor(renderer,clr.r,clr.g, clr.b, 0);
+	SDL_Rect emblemRect = {winSize.x - 35, winSize.y-40, 31,31};
 	SDL_RenderFillRect(renderer, &emblemRect);
+
+	// Render Coin
+	destRect = {winSize.x - 98 ,winSize.y-32, 30,30};
+	SDL_RenderCopy(renderer, _panelTextures[1], EntireRect, &destRect);
+
+	std::string currency = std::to_string(currentPlayer->getCurrency());
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0});
+	SDL_Texture* curTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+	destRect = {winSize.x - 78 ,winSize.y-36, 30,26};
+	SDL_RenderCopy(renderer, curTexture, EntireRect, &destRect);
+
+	SDL_FreeSurface(textSurface);
+	SDL_DestroyTexture(curTexture);
 	//--------------------------------------------------------------------
 }
