@@ -95,10 +95,19 @@ bool WarState::HandleEvent(const Event &event) {
 
     processUnitSelectionAndMovement(event);
 
-	if (event.type == SDL_KEYDOWN){
+
+	// End Current Round
+	// --------------------------------------------------------------------
+	if (event.type == SDL_KEYDOWN)
+	{
 		const Keysym &what_key = event.key.keysym;
-		if(what_key.scancode == SDL_SCANCODE_SPACE){
+		if(what_key.scancode == SDL_SCANCODE_SPACE)
+		{
 			nextPlayer();
+
+			// add income for all houses
+			int actualVal = currentPlayer->getCurrency();
+			currentPlayer->setCurrency(actualVal + 20 * currentPlayer->getActiveHouses());
 		}
 	}
 
@@ -312,7 +321,7 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
             unitMap[selected->getCoordinates().y][selected->getCoordinates().x] = nullptr;
             unitMap[mouseIndex.y][mouseIndex.x] = selected;
             selected->setCoordinates(mouseIndex.x, mouseIndex.y);
-            //selected->setHasMoved(true);
+            selected->setHasMoved(true);
             sameClick = true;
             clearSelectionAndPath();
         } else if (isLeftMouseButtonDown(event) && !paths->mouseInRadius(mouseIndex, radius)) {
@@ -336,35 +345,31 @@ void WarState::nextPlayer() {
 
 void WarState::drawInterface()
 {
-	if(mouseIndex.y < 10){// draw InfoPanel
-		// ----------------------------------------------------------------
-		const SDL_Point & winSize = game.GetWindowSize();
-
-		// draw right panel for playerinfo
-		SDL_Rect destRect = { winSize.x / 32, winSize.y - 32, winSize.x, 32 };
-		SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
-
-		// draw left panel for tileinfo
-		destRect = { 0, winSize.y - 32, 50, 32 };
-		SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
-
-
-		if( (mouseIndex.x >= 0 && mouseIndex.y >= 0) )
+		if( (mouseIndex.x >= 0 && mouseIndex.y >= 0) && mouseIndex.y < 10 )
 		{
+			// ----------------------------------------------------------------
+			const SDL_Point & winSize = game.GetWindowSize();
+
+			// draw right panel for playerinfo
+			SDL_Rect destRect = { winSize.x / 32, winSize.y - 32, winSize.x, 32 };
+			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
+
+			// draw left panel for tileinfo
+			destRect = { 0, winSize.y - 32, 50, 32 };
+			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
+
+
 			// get defense value
 			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( mouseIndex.x, mouseIndex.y );
 
 			// render tile
 			destRect = { 6, winSize.y - 32, 32, 32 };
-			if( map[1][mouseIndex.y][mouseIndex.x] >= 0 )
-			{
+			if( map[1][mouseIndex.y][mouseIndex.x] >= 0 ){
 				drawTile( map[1][mouseIndex.y][mouseIndex.x], destRect, 512 );
 			}
-			else
-			{
+			else{
 				drawTile( 1, destRect, 512 );
 			}
-
 
 			// render defense value
 			// -------------------------------------------------------------
@@ -373,12 +378,10 @@ void WarState::drawInterface()
 
 			// Set render-color for team-emblem
 			// -------------------------------------------------------------
-			if( currentPlayer->getTeam() == 1 )
-			{
+			if( currentPlayer->getTeam() == 1 ){
 				SDL_SetRenderDrawColor( renderer, 30, 30, 155, 0 );
 			}
-			else
-			{
+			else{
 				SDL_SetRenderDrawColor( renderer, 155, 30, 30, 0 );
 			}
 
@@ -407,4 +410,3 @@ void WarState::drawInterface()
 			//--------------------------------------------------------------------
 		}
 	}
-}
