@@ -108,4 +108,5 @@ public:
     void processUnitSelectionAndMovement(const Event &event);
 
     void nextPlayer();
+	void endRound();
 };
