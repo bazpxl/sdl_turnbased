@@ -1,5 +1,4 @@
 #include "Paths.h"
-#include "States/examplegame.h"
 
 [[maybe_unused]] void printGraph(const std::vector<std::vector<int>> &graph) {
     for (const auto &row: graph) {

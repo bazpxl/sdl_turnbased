@@ -24,6 +24,8 @@ void WarState::Init() {
 
     initUnitMap();
 
+    RS::getInstance().setUnitmap(unitMap);
+
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
 
     cc = new CombatCalculator(MapStats::getInstance(&map, &unitMap));

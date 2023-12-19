@@ -6,11 +6,11 @@
 class CombatCalculator {
 public:
     explicit CombatCalculator(MapStats &mapStats);
-    float calculateDamage(const Unit &attacker, const Unit &defender) const;
+    [[nodiscard]] float calculateDamage(const Unit &attacker, const Unit &defender) const;
 private:
     [[maybe_unused]] MapStats &_mapStats;
     std::vector<std::vector<int>> _damageMatrix;
-    float getDamage(const Unit &attacker,const Unit &defender) const;
+    [[nodiscard]] float getDamage(const Unit &attacker,const Unit &defender) const;
 };
 
 
