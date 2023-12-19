@@ -24,6 +24,7 @@ protected:
     int _fuel;
     const int _maxFuel;
     int _ammo;
+    const int _maxAmmo;
     const int _price;
     bool _canAttack = true;
     bool _hasMoved = false;
@@ -34,10 +35,9 @@ protected:
 public:
     Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
          int attackRange,int offset, int fuel,
-         int maxFuel, int ammo, int price, bool canAttack = true);
+         int maxFuel, int ammo, int maxAmmo, int price, bool canAttack = true);
 
-    // TODO: Implement showMovementRange
-    //void showMovementRange();
+
 
     virtual ~Unit() = default;
 
