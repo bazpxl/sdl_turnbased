@@ -5,8 +5,9 @@ TTF_Font *indexFont;
 std::unique_ptr<Unit> infantryUnit;
 std::unique_ptr<Unit> mechUnit;
 std::unique_ptr<Unit> infantryUnit2;
-Player* WarState::currentPlayer = new Player(3,2,3,1);
 
+
+std::vector<std::unique_ptr<Unit>> infantryUnits;
 bool operator==(const SDL_Point &lhs, const SDL_Point &rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
@@ -17,37 +18,95 @@ bool operator!=(const SDL_Point &lhs, const SDL_Point &rhs) {
 
 void WarState::Init() {
 
-
     RS::getInstance().init(renderer);
 
-    map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
-    map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
+    // all map initializations
+    initMap();
 
-    initUnitMap();
+
+
+    RS::getInstance().setUnitmap(unitMap);
 
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
+    cc = new CombatCalculator(MapStats::getInstance(&map, &unitMap));
 
     loadTileset("asset/graphic/NewTiles.png");
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2);
-    mechUnit = UnitFactory::createUnit(UnitType::MECH, 1, 8, 2);
-    infantryUnit2 = UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1);
-    std::cout <<infantryUnit2->getMoveRange() << std::endl;
-    std::cout <<infantryUnit2->getAttackRange() << std::endl;
 
-
-    unitMap[2][13] = infantryUnit2.get();
-    unitMap[9][2] = infantryUnit.get();
-    unitMap[8][1] = mechUnit.get();
 
     // Kann ggf weg
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+
+//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2));
+//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 1, 8, 2));
+//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1));
+//    unitMap[2][13] = infantryUnits[0].get();
+//    unitMap[9][2] = infantryUnits[1].get();
+//    unitMap[8][1] = infantryUnits[2].get();
+
+	players.push_back(new Player(20,20,4,1));
+	players.push_back(new Player(20,20,4,2));
+	currentPlayer = players[0];
+
+	_panelTextures.push_back(IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png"));
+	if (!_panelTextures[0]) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
+	_panelTextures.push_back((IMG_LoadTexture(renderer, BasePath"asset/graphic/coin.png")));
+	if (!_panelTextures[1]) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
+
+    _indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+
+	SDL_FreeSurface(textSurface);
 }
 
 void WarState::UnInit() {
     delete (paths);
     SDL_DestroyTexture(texture);
-    TTF_CloseFont(indexFont);
+	for(auto txt : _panelFontTextures){
+		SDL_DestroyTexture(txt);
+	}
+	for(auto txt: _panelTextures){
+		SDL_DestroyTexture(txt);
+	}
+    TTF_CloseFont(_indexFont);
+}
+
+void WarState::endRound(){
+	// Reset actions for all units
+	//----------------------------------------------
+	for (auto &row: unitMap) {
+		for (auto &unit: row) {
+			if (unit != nullptr) {
+				unit->setFinishedTurn(false);
+				unit->setHasAttacked(false);
+				unit->setHasMoved(false);
+			}
+		}
+	}
+
+	// set currentPlayer pointer
+	//-------------------------------------------------
+	nextPlayer();
+
+
+	// set income calculation based on house count
+	int actualVal = currentPlayer->getCurrency();
+	currentPlayer->setCurrency(actualVal + 20 * currentPlayer->getActiveHouses());
+
 }
 
 bool WarState::HandleEvent(const Event &event) {
@@ -60,12 +119,21 @@ bool WarState::HandleEvent(const Event &event) {
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
         game.SetNextState(1);
     }
-    
+
     if (isLeftMouseButtonUp(event)) {
         handleLeftMouseButtonUp();
     }
 
     processUnitSelectionAndMovement(event);
+
+	// End Current Round
+	// --------------------------------------------------------------------
+	if (event.type == SDL_KEYDOWN){
+		const Keysym &what_key = event.key.keysym;
+		if(what_key.scancode == SDL_SCANCODE_SPACE)
+			endRound();
+	}
+
     return false;
 }
 
@@ -84,6 +152,8 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
     //draw units
     drawUnits();
+
+	drawInterface();
 
 }
 
@@ -206,6 +276,19 @@ void WarState::initUnitMap() {
     Unit::setUnitMap(&unitMap);
 }
 
+void WarState::initBuildingMap() {
+    if (!map.empty() && !map[0].empty()) {
+        size_t numRows = map[0].size();
+        size_t numCols = map[0][0].size();
+
+        buildingMap.resize(numRows);
+        for (auto &row: buildingMap) {
+            row.resize(numCols, nullptr);
+        }
+    }
+    buildingMap.reserve(map.capacity());
+}
+
 void WarState::updateMouseIndex(const Event &event) {
     if (event.type == SDL_MOUSEMOTION) {
         mouseIndex.x = event.motion.x / 32;
@@ -239,7 +322,8 @@ void WarState::clearSelectionAndPath() {
 
 void WarState::processUnitSelectionAndMovement(const Event &event) {
     Unit *unit;
-    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= unitMap[0].size() || mouseIndex.y >= unitMap.size()) {
+    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= int(unitMap[0].size()) ||
+        mouseIndex.y >= int(unitMap.size())) {
         unit = nullptr;
     } else {
         unit = unitMap[mouseIndex.y][mouseIndex.x];
@@ -253,10 +337,10 @@ void WarState::processUnitSelectionAndMovement(const Event &event) {
 
 void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
-    if (unit && unit->getTeam() == 1 && !unit->hasMoved()) {
+    if (unit && unit->getTeam() == currentPlayer->getTeam() && !unit->hasMoved()) {
         selected = unit;
     }
-    if (unit && !selected && (unit->getTeam() != 1 || unit->hasMoved())) {
+    if (unit && !selected && (unit->getTeam() != currentPlayer->getTeam() || unit->hasMoved())) {
 
         path.clear();
         radius = paths->getMoveRadius(mouseIndex, unit->getMovementType(), unit->getMoveRange(), radius);
@@ -264,7 +348,8 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
     } else if (selected) {
         //radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
-        radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
+        radius = paths->getMoveRadius(selected->getCoordinates(), selected->getMovementType(), selected->getMoveRange(),
+                                      radius);
         attackRadius = paths->getAttackRadius(selected->getCoordinates(), selected->getAttackRange(), radius);
         path = paths->getPath(selected->getCoordinates(), mouseIndex, radius);
 
@@ -274,7 +359,7 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
             unitMap[selected->getCoordinates().y][selected->getCoordinates().x] = nullptr;
             unitMap[mouseIndex.y][mouseIndex.x] = selected;
             selected->setCoordinates(mouseIndex.x, mouseIndex.y);
-            //selected->setHasMoved(true);
+            selected->setHasMoved(true);
             sameClick = true;
             clearSelectionAndPath();
         } else if (isLeftMouseButtonDown(event) && !paths->mouseInRadius(mouseIndex, radius)) {
@@ -284,3 +369,159 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
     }
 
 }
+
+void WarState::nextPlayer() {
+        auto it = std::find(players.begin(), players.end(), currentPlayer);
+        if (it != players.end()) {
+            ++it;
+            if (it == players.end()) {
+                it = players.begin();
+            }
+            currentPlayer = *it;
+        }
+}
+
+void WarState::drawInterface()
+{
+	// If mouseIndex.y is above 10 -> Interface becomes invisible
+	// ----------------------------------------------------------------
+		if( (mouseIndex.x >= 0 && mouseIndex.y >= 0) && mouseIndex.y < 10 )
+		{
+			const SDL_Point & winSize = game.GetWindowSize();
+
+			// draw right panel for playerinfo
+			SDL_Rect destRect = { winSize.x / 32, winSize.y - 32, winSize.x, 32 };
+			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
+			// draw left panel for tileinfo
+			destRect = { 0, winSize.y - 32, 50, 32 };
+			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
+
+			// get defense value
+			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( {mouseIndex.x, mouseIndex.y} );
+
+			// render tile
+			destRect = { 6, winSize.y - 32, 32, 32 };
+			if( map[1][mouseIndex.y][mouseIndex.x] >= 0 ){
+				drawTile( map[1][mouseIndex.y][mouseIndex.x], destRect, 512 );
+			}
+			else{
+				drawTile( 1, destRect, 512 );
+			}
+
+			// render defense value
+			// -------------------------------------------------------------
+			destRect.x += 37;
+			SDL_RenderCopy( renderer, _panelFontTextures[defense], EntireRect, &destRect );
+
+			// Set render-color for team-emblem
+			// -------------------------------------------------------------
+			if( currentPlayer->getTeam() == 1 ){
+				SDL_SetRenderDrawColor( renderer, 30, 30, 155, 0 );
+			}
+			else{
+				SDL_SetRenderDrawColor( renderer, 155, 30, 30, 0 );
+			}
+
+			// Render team-emblem
+			// --------------------------------------------------------------
+			SDL_Rect emblemRect = { winSize.x - 35, winSize.y - 28, 27, 27 };
+			SDL_RenderFillRect( renderer, &emblemRect );
+
+			// Render Coin
+			// --------------------------------------------------------------
+			destRect = { winSize.x - 96, winSize.y - 26, 32, 32 };
+			SDL_RenderCopy( renderer, _panelTextures[1], EntireRect, &destRect );
+
+			// Create TTF-font surface and render currency-val
+			// ---------------------------------------------------------------
+			std::string currency = std::to_string( currentPlayer->getCurrency() );
+			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 } );
+			SDL_Texture * curTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
+
+			destRect = { winSize.x - 74, winSize.y - 32, 32, 32 };
+			SDL_RenderCopy( renderer, curTexture, EntireRect, &destRect );
+
+			SDL_FreeSurface( textSurface );
+			SDL_DestroyTexture( curTexture );
+
+			//--------------------------------------------------------------------
+		}
+	}
+
+void WarState::initMap() {
+    map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
+    map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
+
+    initUnitMap();
+    loadUnitMap();
+    // bMap is already initialized as map
+    initBuildingMap();
+
+    auto ms = MapStats::getInstance(&map, &unitMap);
+
+    for (size_t y = 0; y < map[0].size(); y++) {
+        for (size_t x = 0; x < map[0][0].size(); x++) {
+            auto tileType = ms.getTileType({static_cast<int>(x), static_cast<int>(y)});
+            if (tileType == TileType::HQ || tileType == TileType::CITY || tileType == TileType::AIRPORT ||
+                tileType == TileType::PORT) {
+                buildingMap[y][x] = BuildingFactory::createBuilding(tileType, map[1][y][x],
+                                                                    {static_cast<int>(x), static_cast<int>(y)}).get();
+            }
+        }
+    }
+
+}
+
+void WarState::loadUnitMap() {
+    std::ifstream file(BasePath"asset/map/pvp/unit.csv");
+
+    if (!file.is_open()) {
+        std::cerr << "Fehler beim Öffnen der Datei: " << BasePath"asset/map/pvp/unit.csv" << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string cell;
+
+        std::getline(ss, cell, ',');
+        int i = std::stoi(cell);
+
+        std::getline(ss, cell, ',');
+        int j = std::stoi(cell);
+
+        std::getline(ss, cell, ',');
+        int team = std::stoi(cell);
+
+        std::getline(ss, cell, ',');
+        auto type = static_cast<UnitType>(std::stoi(cell));
+
+        auto unit = UnitFactory::createUnit(type, j, i, team);
+        units.push_back(std::move(unit));
+        unitMap[i][j] = units.back().get();
+    }
+
+    file.close();
+
+}
+
+void WarState::saveUnitMap() {
+    std::ofstream file(BasePath"asset/map/pvp/unit.csv");
+
+    if (!file.is_open()) {
+        std::cerr << "Fehler beim Öffnen der Datei: " << BasePath"asset/map/pvp/unit.csv" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < unitMap.size(); ++i) {
+        for (size_t j = 0; j < unitMap[i].size(); ++j) {
+            if (unitMap[i][j] != nullptr) {
+                file << i << "," << j << "," << unitMap[i][j]->getTeam() << ","
+                     << static_cast<int>(unitMap[i][j]->getType()) << "\n";
+            }
+        }
+    }
+    file.close();
+}
+
+

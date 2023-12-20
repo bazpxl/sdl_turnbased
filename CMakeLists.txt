@@ -201,13 +201,22 @@ add_executable( sdl_basegame
         src/Helper/map_stat_helper.h
         src/Helper/enums.h
         src/UI/Cursor.cpp
-        src/UI/Cursor.h 
+        src/UI/Cursor.h
         src/Map/Paths.cpp
         src/Map/Paths.h
         src/States/ShopState.cpp
         src/States/turns.cpp
         src/States/turns.h
-        src/player.cpp)
+        src/States/turns.h
+        src/player.cpp
+        src/Units/CombatCalculator.cpp
+        src/Units/CombatCalculator.h
+        src/Units/CombatCalculator.h
+        src/Units/CombatCalculator.h
+        src/UI/ActionMenu.cpp
+        src/UI/ActionMenu.h
+        src/Buildings/Building.cpp
+        src/Buildings/Building.h)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")

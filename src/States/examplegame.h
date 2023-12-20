@@ -13,6 +13,8 @@
 #include "Units/Unit.h"
 #include "Helper/map_stat_helper.h"
 #include "Map/Paths.h"
+#include "Units/CombatCalculator.h"
+#include "Buildings/Building.h"
 
 
 class ExampleGame;
@@ -38,13 +40,24 @@ class WarState : public ExampleGameState {
 public:
     Paths *paths;
     static Player *currentPlayer;
+
+	TTF_Font *_indexFont;
+	Paths *paths;
+    Player *currentPlayer;
+    std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
+    std::vector<std::vector<Building*>> buildingMap;
+	std::vector<SDL_Texture*>_panelFontTextures;
+	std::vector<SDL_Texture*>_panelTextures;
     SDL_Texture *texture;
 
     // handle unit interaction
     SDL_Point mouseIndex;
     std::vector<std::vector<Unit *>> unitMap;
+    std::vector<std::unique_ptr<Unit>> units;
+
     std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
+    CombatCalculator * cc;
 
     Unit *selected = nullptr;
     bool mouseDown = false;
@@ -70,7 +83,15 @@ public:
 
     void loadTileset(const string &filename);
 
+    void initMap();
+
     void initUnitMap();
+
+    void initBuildingMap();
+
+    void loadUnitMap();
+
+    void saveUnitMap();
 
     static std::vector<std::vector<int>> csvToMap(const string &filename);
 
@@ -83,6 +104,8 @@ public:
     void drawMap();
 
     void drawUnits();
+
+	void drawInterface();
 
     // Event Handling
     void updateMouseIndex(const Event &event);
@@ -100,6 +123,9 @@ public:
     void handleUnitInteraction(Unit* unit, const Event &event);
 
     void processUnitSelectionAndMovement(const Event &event);
+
+    void nextPlayer();
+	void endRound();
 };
 
 class ShopState : public ExampleGameState
@@ -110,7 +136,7 @@ public:
 
     void Init() override;
     void UnInit() override;
-    
+
     bool HandleEvent(const Event& event) override;
     void Update(const u32 frame, const u32 totalMSec, const float deltaT) override;
     void Render(const u32 frame, const u32 totalMSec, const float deltaT) override;
