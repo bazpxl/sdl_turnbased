@@ -5,7 +5,7 @@ TTF_Font *indexFont;
 std::unique_ptr<Unit> infantryUnit;
 std::unique_ptr<Unit> mechUnit;
 std::unique_ptr<Unit> infantryUnit2;
-
+Player* WarState::currentPlayer = new Player(3,2,3,1);
 
 bool operator==(const SDL_Point &lhs, const SDL_Point &rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
@@ -16,6 +16,7 @@ bool operator!=(const SDL_Point &lhs, const SDL_Point &rhs) {
 }
 
 void WarState::Init() {
+
 
     RS::getInstance().init(renderer);
 
@@ -56,7 +57,7 @@ bool WarState::HandleEvent(const Event &event) {
         handleLeftMouseButtonDown();
     }
 
-    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
         game.SetNextState(1);
     }
     

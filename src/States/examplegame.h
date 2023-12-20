@@ -37,7 +37,7 @@ public:
 class WarState : public ExampleGameState {
 public:
     Paths *paths;
-    Player *currentPlayer;
+    static Player *currentPlayer;
     std::vector<std::vector<std::vector<int>>> map;
     SDL_Texture *texture;
 
@@ -110,7 +110,7 @@ public:
 
     void Init() override;
     void UnInit() override;
-
+    
     bool HandleEvent(const Event& event) override;
     void Update(const u32 frame, const u32 totalMSec, const float deltaT) override;
     void Render(const u32 frame, const u32 totalMSec, const float deltaT) override;
