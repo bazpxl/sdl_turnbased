@@ -1,3 +1,4 @@
+#include "examplegame.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -9,7 +10,7 @@
 
 
 void MapState::drawTile(SDL_Renderer* renderer, SDL_Texture* tilesetTexture, int tileIndex, SDL_Rect& destRect, int imgSizeX,
-    int tileSize = 16) {
+    int tileSize = 16, int w = 32) {
     int tilesPerRow = imgSizeX / tileSize;
 
     SDL_Rect srcRect;
@@ -17,7 +18,7 @@ void MapState::drawTile(SDL_Renderer* renderer, SDL_Texture* tilesetTexture, int
     srcRect.x = (tileIndex % tilesPerRow) * tileSize;
     srcRect.y = (tileIndex / tilesPerRow) * tileSize;
 
-    destRect.w = destRect.h = 32;
+    destRect.w = destRect.h = w;
 
     SDL_RenderCopy(renderer, tilesetTexture, &srcRect, &destRect);
 }
@@ -133,9 +134,21 @@ bool MapState::HandleEvent(const Event& event) {
             if (event.button.x > game.GetWindowSize().x - 32 && event.button.y < 16) {
                 currentLayer = 1-(game.GetWindowSize().x - event.button.x)/16;
             }
-            string folderName = "testMap";
-            mapToCsv(Map[0], BasePath "asset/map/bg.csv");
-            mapToCsv(Map[1], BasePath "asset/map/map.csv");
+            else if (event.button.x > game.GetWindowSize().x-48 && event.button.y < 16) {
+                string filename;
+                std::cout << "Bitte geben Sie den Dateinamen zum speichern an\n";
+                std::cin >> filename;
+                mapToCsv(Map[0], BasePath "asset/map/"+filename+"_bg.csv");
+                mapToCsv(Map[1], BasePath "asset/map/" + filename + "_map.csv");
+            }
+            else if (event.button.x > game.GetWindowSize().x - 64 && event.button.y < 16) {
+                string filename;
+                std::cout << "Bitte geben Sie den Dateinamen zum laden an\n";
+                std::cin >> filename;
+                Map[0] = csvToMap(BasePath "asset/map/" + filename + "_bg.csv");
+                Map[1] = csvToMap(BasePath "asset/map/" + filename + "_map.csv");
+
+            }
 
 		}
 		else if (event.button.button == SDL_BUTTON_RIGHT) {
@@ -189,6 +202,12 @@ void MapState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
     destRect = { game.GetWindowSize().x - 32,-16 };
     drawTile(renderer, texture, 322, destRect, 512);
+
+    destRect = { game.GetWindowSize().x - 48,0,16,16 };
+    drawTile(renderer, texture, 113, destRect, 512,16,16);
+
+    destRect = { game.GetWindowSize().x - 64,0,16,16 };
+    drawTile(renderer, texture, 81, destRect, 512, 16,16);
 
     borderX = ((game.GetWindowSize().x - 32)+16*currentLayer);
     borderY = 0;
