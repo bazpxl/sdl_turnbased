@@ -195,7 +195,7 @@ add_executable( sdl_basegame
         src/States/turns.cpp
         src/States/turns.h
         src/States/turns.h
-        src/player.cpp)
+        src/player.cpp "src/States/mapstate.cpp")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")

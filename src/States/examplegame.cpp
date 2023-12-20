@@ -3,11 +3,13 @@
 constexpr bool doBenchmark = true;
 
 ExampleGame::ExampleGame()
-	: Game("Warcrimes",{15*32,11*32}, false)
+	: Game("Warcrimes",{31*32,11*32}, false)
 {
 	// Will be freed in Game dtor
 	allStates = {
-        new WarState        (*this, renderer)
+        new WarState        (*this, renderer),
+		new MapState(*this, renderer)
+
 	};
 
 	// The virtual call is ok here
@@ -35,7 +37,13 @@ bool ExampleGame::HandleEvent( const Event & event )
 				SetNextState( 0 );
 				return true;
 			}
-
+			if (what_key.scancode == SDL_SCANCODE_2)
+			{
+				// Both Game and GameState can change the State,
+				// but it will only be changed after the current frame
+				SetNextState(1);
+				return true;
+			}
 			break;
 		}
 
