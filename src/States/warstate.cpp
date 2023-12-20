@@ -393,7 +393,7 @@ void WarState::drawInterface()
 			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
 
 			// get defense value
-			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( mouseIndex.x, mouseIndex.y );
+			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( {mouseIndex.x, mouseIndex.y} );
 
 			// render tile
 			destRect = { 6, winSize.y - 32, 32, 32 };
