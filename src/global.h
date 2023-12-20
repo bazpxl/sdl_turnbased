@@ -1,5 +1,5 @@
-#pragma once
 
+#pragma once
 
 #define _GLIBC_USE_DEPRECATED 0
 #define _GLIBCXX_USE_DEPRECATED 0
@@ -98,7 +98,6 @@ template<class T>                                   using WeakPtr   = std::weak_
 
 #include "Helper/autocast_ptr.h"
 
-
 using Clock     = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
 using Duration  = Clock::duration;
@@ -124,7 +123,7 @@ using fmt::print, fmt::println, fmt::format;
 #define BasePath "../../"          // Pfad für Apple-Geräte
 #else
 // Definitionen für andere Compiler und Systeme
-#define BasePath "../../../../"    // Standard-Definition für andere Systeme
+#define BasePath "../../"    // Standard-Definition für andere Systeme
 #endif
 #endif
 
@@ -279,8 +278,6 @@ inline void SDL_ImGui_Frame( Renderer * renderer, Window * window )
 	SDL_GL_SwapWindow( window );
 	*/
 }
-
-
 
 #else
 #define ImGuiOnly( ... ) // nothing

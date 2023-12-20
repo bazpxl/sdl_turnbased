@@ -13,6 +13,8 @@
 #include "Units/Unit.h"
 #include "Helper/map_stat_helper.h"
 #include "Map/Paths.h"
+#include "Units/CombatCalculator.h"
+#include "Buildings/Building.h"
 
 
 class ExampleGame;
@@ -41,6 +43,7 @@ public:
     Player *currentPlayer;
     std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
+    std::vector<std::vector<Building*>> buildingMap;
 	std::vector<SDL_Texture*>_panelFontTextures;
 	std::vector<SDL_Texture*>_panelTextures;
     SDL_Texture *texture;
@@ -48,7 +51,10 @@ public:
     // handle unit interaction
     SDL_Point mouseIndex;
     std::vector<std::vector<Unit *>> unitMap;
+    std::vector<std::unique_ptr<Unit>> units;
+
     std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
+    CombatCalculator * cc;
 
     Unit *selected = nullptr;
     bool mouseDown = false;
@@ -74,7 +80,15 @@ public:
 
     void loadTileset(const string &filename);
 
+    void initMap();
+
     void initUnitMap();
+
+    void initBuildingMap();
+
+    void loadUnitMap();
+
+    void saveUnitMap();
 
     static std::vector<std::vector<int>> csvToMap(const string &filename);
 

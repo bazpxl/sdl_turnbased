@@ -1,6 +1,49 @@
 #ifndef SDL_BASEGAME_ENUMS_H
 #define SDL_BASEGAME_ENUMS_H
 
+enum class BuildingIndex{
+    CITY_GREY = 8,
+    CITY_GREEN = 40,
+    CITY_BLUE = 72,
+    CITY_RED = 104,
+    CITY_YELLOW = 136,
+    ALT_HQ_GREY = 9,
+    ALT_HQ_GREEN = 41,
+    ALT_HQ_BLUE = 73,
+    ALT_HQ_RED = 105,
+    ALT_HQ_YELLOW = 137,
+    HQ_GREY = 10,
+    HQ_GREEN = 42,
+    HQ_BLUE = 74,
+    HQ_RED = 106,
+    HQ_YELLOW = 138,
+    FACTORY_GREY = 11,
+    FACTORY_GREEN = 43,
+    FACTORY_BLUE = 75,
+    FACTORY_RED = 107,
+    FACTORY_YELLOW = 139,
+    PORT_GREY = 12,
+    PORT_GREEN = 44,
+    PORT_BLUE = 76,
+    PORT_RED = 108,
+    PORT_YELLOW = 140,
+    ALT_PORT_GREY = 13,
+    ALT_PORT_GREEN = 45,
+    ALT_PORT_BLUE = 77,
+    ALT_PORT_RED = 109,
+    ALT_PORT_YELLOW = 141,
+    ROCKET_GREY = 14,
+    ROCKET_GREEN = 46,
+    ROCKET_BLUE = 78,
+    ROCKET_RED = 110,
+    ROCKET_YELLOW = 142,
+    AIRPORT_GREY = 15,
+    AIRPORT_GREEN = 47,
+    AIRPORT_BLUE = 79,
+    AIRPORT_RED = 111,
+    AIRPORT_YELLOW = 143
+};
+
 enum class MovementType {
     INFANTRY,
     MECH,
@@ -20,17 +63,17 @@ enum class UnitType {
     MEDIUM_TANK,
     APC,
     ARTILLERY,
-    ROCKETS,
+    ROCKET,
     ANTI_AIR,
-    MISSILES,
-    B_COPTER,
-    T_COPTER,
+    MISSILE,
+    BATTLE_COPTER,
+    TRANSPORT_COPTER,
     FIGHTER,
     BOMBER,
-    BATTLESHIP,
-    CRUISER,
     LANDER,
-    SUBMARINE
+    CRUISER,
+    SUBMARINE,
+    BATTLESHIP
 };
 
 enum class TileType {

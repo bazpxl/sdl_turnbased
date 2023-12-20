@@ -24,7 +24,9 @@ protected:
     int _fuel;
     const int _maxFuel;
     int _ammo;
+    const int _maxAmmo;
     const int _price;
+    bool _canAttack = true;
     bool _hasMoved = false;
     bool _hasAttacked = false;
     bool _finishedTurn = false;
@@ -33,10 +35,9 @@ protected:
 public:
     Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
          int attackRange,int offset, int fuel,
-         int maxFuel, int ammo, int price);
+         int maxFuel, int ammo, int maxAmmo, int price, bool canAttack = true);
 
-    // TODO: Implement showMovementRange
-    //void showMovementRange();
+
 
     virtual ~Unit() = default;
 
@@ -101,14 +102,79 @@ public:
     static std::unique_ptr<Unit> createUnit(UnitType type, int x, int y, int team);
 };
 
-class Infantry : public Unit {
+class Infantry final : public Unit {
 public:
     Infantry(int x, int y, int team);
 };
 
-class Mech : public Unit {
+class Mech final : public Unit {
 public:
     Mech(int x, int y, int team);
+};
+
+class Recon final : public Unit {
+public:
+    Recon(int x, int y, int team);
+};
+
+class Tank final : public Unit {
+    Tank(int x, int y, int team);
+};
+
+class MediumTank final : public Unit {
+    MediumTank(int x, int y, int team);
+};
+
+class APC final : public Unit {
+    APC(int x, int y, int team);
+};
+
+class Artillery final : public Unit {
+    Artillery(int x, int y, int team);
+};
+
+class Rocket final : public Unit {
+    Rocket(int x, int y, int team);
+};
+
+class AntiAir final : public Unit {
+    AntiAir(int x, int y, int team);
+};
+
+class Missiles final : public Unit {
+    Missiles(int x, int y, int team);
+};
+
+class BattleCopter final : public Unit {
+    BattleCopter(int x, int y, int team);
+};
+
+class TransportCopter final : public Unit {
+    TransportCopter(int x, int y, int team);
+};
+
+class Fighter final : public Unit {
+    Fighter(int x, int y, int team);
+};
+
+class Bomber final : public Unit {
+    Bomber(int x, int y, int team);
+};
+
+class Lander final : public Unit {
+    Lander(int x, int y, int team);
+};
+
+class Cruiser final : public Unit {
+    Cruiser(int x, int y, int team);
+};
+
+class Submarine final : public Unit {
+    Submarine(int x, int y, int team);
+};
+
+class Battleship final : public Unit {
+    Battleship(int x, int y, int team);
 };
 
 #endif //SDL_BASEGAME_UNIT_H

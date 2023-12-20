@@ -1,6 +1,6 @@
 #include "examplegame.h"
 
-
+TTF_Font *indexFont;
 
 std::unique_ptr<Unit> infantryUnit;
 std::unique_ptr<Unit> mechUnit;
@@ -20,21 +20,22 @@ void WarState::Init() {
 
     RS::getInstance().init(renderer);
 
-    map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
-    map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
-    initUnitMap();
+    // all map initializations
+    initMap();
+
+
+
+    RS::getInstance().setUnitmap(unitMap);
 
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
+    cc = new CombatCalculator(MapStats::getInstance(&map, &unitMap));
 
     loadTileset("asset/graphic/NewTiles.png");
 
-    infantryUnit = UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2);
-    mechUnit = UnitFactory::createUnit(UnitType::MECH, 1, 8, 2);
-    infantryUnit2 = UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1);
 
-    unitMap[2][13] = infantryUnit2.get();
-    unitMap[9][2] = infantryUnit.get();
-    unitMap[8][1] = mechUnit.get();
+
+    // Kann ggf weg
+    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 
 //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2));
 //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 1, 8, 2));
@@ -271,6 +272,19 @@ void WarState::initUnitMap() {
     Unit::setUnitMap(&unitMap);
 }
 
+void WarState::initBuildingMap() {
+    if (!map.empty() && !map[0].empty()) {
+        size_t numRows = map[0].size();
+        size_t numCols = map[0][0].size();
+
+        buildingMap.resize(numRows);
+        for (auto &row: buildingMap) {
+            row.resize(numCols, nullptr);
+        }
+    }
+    buildingMap.reserve(map.capacity());
+}
+
 void WarState::updateMouseIndex(const Event &event) {
     if (event.type == SDL_MOUSEMOTION) {
         mouseIndex.x = event.motion.x / 32;
@@ -304,7 +318,8 @@ void WarState::clearSelectionAndPath() {
 
 void WarState::processUnitSelectionAndMovement(const Event &event) {
     Unit *unit;
-    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= unitMap[0].size() || mouseIndex.y >= unitMap.size()) {
+    if (mouseIndex.x < 0 || mouseIndex.y < 0 || mouseIndex.x >= int(unitMap[0].size()) ||
+        mouseIndex.y >= int(unitMap.size())) {
         unit = nullptr;
     } else {
         unit = unitMap[mouseIndex.y][mouseIndex.x];
@@ -329,7 +344,8 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
     } else if (selected) {
         //radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
-        radius = paths->getMoveRadius(selected->getCoordinates(),selected->getMovementType(),selected->getMoveRange(),radius);
+        radius = paths->getMoveRadius(selected->getCoordinates(), selected->getMovementType(), selected->getMoveRange(),
+                                      radius);
         attackRadius = paths->getAttackRadius(selected->getCoordinates(), selected->getAttackRange(), radius);
         path = paths->getPath(selected->getCoordinates(), mouseIndex, radius);
 
@@ -377,7 +393,7 @@ void WarState::drawInterface()
 			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
 
 			// get defense value
-			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( mouseIndex.x, mouseIndex.y );
+			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( {mouseIndex.x, mouseIndex.y} );
 
 			// render tile
 			destRect = { 6, winSize.y - 32, 32, 32 };
@@ -427,3 +443,81 @@ void WarState::drawInterface()
 			//--------------------------------------------------------------------
 		}
 	}
+
+void WarState::initMap() {
+    map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
+    map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
+
+    initUnitMap();
+    loadUnitMap();
+    // bMap is already initialized as map
+    initBuildingMap();
+
+    auto ms = MapStats::getInstance(&map, &unitMap);
+
+    for (size_t y = 0; y < map[0].size(); y++) {
+        for (size_t x = 0; x < map[0][0].size(); x++) {
+            auto tileType = ms.getTileType({static_cast<int>(x), static_cast<int>(y)});
+            if (tileType == TileType::HQ || tileType == TileType::CITY || tileType == TileType::AIRPORT ||
+                tileType == TileType::PORT) {
+                buildingMap[y][x] = BuildingFactory::createBuilding(tileType, map[1][y][x],
+                                                                    {static_cast<int>(x), static_cast<int>(y)}).get();
+            }
+        }
+    }
+
+}
+
+void WarState::loadUnitMap() {
+    std::ifstream file(BasePath"asset/map/pvp/unit.csv");
+
+    if (!file.is_open()) {
+        std::cerr << "Fehler beim Öffnen der Datei: " << BasePath"asset/map/pvp/unit.csv" << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string cell;
+
+        std::getline(ss, cell, ',');
+        int i = std::stoi(cell);
+
+        std::getline(ss, cell, ',');
+        int j = std::stoi(cell);
+
+        std::getline(ss, cell, ',');
+        int team = std::stoi(cell);
+
+        std::getline(ss, cell, ',');
+        auto type = static_cast<UnitType>(std::stoi(cell));
+
+        auto unit = UnitFactory::createUnit(type, j, i, team);
+        units.push_back(std::move(unit));
+        unitMap[i][j] = units.back().get();
+    }
+
+    file.close();
+
+}
+
+void WarState::saveUnitMap() {
+    std::ofstream file(BasePath"asset/map/pvp/unit.csv");
+
+    if (!file.is_open()) {
+        std::cerr << "Fehler beim Öffnen der Datei: " << BasePath"asset/map/pvp/unit.csv" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < unitMap.size(); ++i) {
+        for (size_t j = 0; j < unitMap[i].size(); ++j) {
+            if (unitMap[i][j] != nullptr) {
+                file << i << "," << j << "," << unitMap[i][j]->getTeam() << ","
+                     << static_cast<int>(unitMap[i][j]->getType()) << "\n";
+            }
+        }
+    }
+    file.close();
+}
+
+
