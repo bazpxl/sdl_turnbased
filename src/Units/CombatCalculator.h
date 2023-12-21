@@ -3,6 +3,9 @@
 #include "../Helper/map_stat_helper.h"
 #include "Unit.h"
 
+class Unit;
+class MapStats;
+
 class CombatCalculator {
 public:
     explicit CombatCalculator(MapStats &mapStats);

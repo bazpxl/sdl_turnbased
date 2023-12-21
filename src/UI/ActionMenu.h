@@ -12,8 +12,10 @@ private:
     Player * _currentPlayer;
     std::vector<std::function<void()>> _options;
 public:
-    void updateOptions(Unit * selected);
+    bool _isVisible = false;
     void generateOptions(Unit * selected, const std::vector<std::vector<Unit*>>& unitMap);
+    void drawUI();
+    void selectOption(int index);
 };
 
 

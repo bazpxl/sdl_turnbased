@@ -23,12 +23,14 @@ void WarState::Init() {
     // all map initializations
     initMap();
 
+    actionMenu = ActionMenu();
 
 
     RS::getInstance().setUnitmap(unitMap);
 
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
     cc = new CombatCalculator(MapStats::getInstance(&map, &unitMap));
+    Unit::setCombatCalculator(cc);
 
     loadTileset("asset/graphic/NewTiles.png");
 
@@ -37,12 +39,7 @@ void WarState::Init() {
     // Kann ggf weg
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 
-//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2));
-//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 1, 8, 2));
-//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1));
-//    unitMap[2][13] = infantryUnits[0].get();
-//    unitMap[9][2] = infantryUnits[1].get();
-//    unitMap[8][1] = infantryUnits[2].get();
+
 
 	players.push_back(new Player(20,20,4,1));
 	players.push_back(new Player(20,20,4,2));
@@ -85,35 +82,14 @@ void WarState::UnInit() {
     TTF_CloseFont(_indexFont);
 }
 
-void WarState::endRound(){
-	// Reset actions for all units
-	//----------------------------------------------
-	for (auto &row: unitMap) {
-		for (auto &unit: row) {
-			if (unit != nullptr) {
-				unit->setFinishedTurn(false);
-				unit->setHasAttacked(false);
-				unit->setHasMoved(false);
-			}
-		}
-	}
 
-	// set currentPlayer pointer
-	//-------------------------------------------------
-	nextPlayer();
-
-
-	// set income calculation based on house count
-	int actualVal = currentPlayer->getCurrency();
-	currentPlayer->setCurrency(actualVal + 20 * currentPlayer->getActiveHouses());
-
-}
 
 bool WarState::HandleEvent(const Event &event) {
     updateMouseIndex(event);
 
     if (isLeftMouseButtonDown(event)) {
         handleLeftMouseButtonDown();
+        units[0]->attack(*units[1]);
     }
 
     if (isLeftMouseButtonUp(event)) {
@@ -157,6 +133,30 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
  * ##  FUNCTIONS CLEANUP                       ##
  * ##############################################
  * */
+
+void WarState::endRound(){
+    // Reset actions for all units
+    //----------------------------------------------
+    for (auto &row: unitMap) {
+        for (auto &unit: row) {
+            if (unit != nullptr) {
+                unit->setFinishedTurn(false);
+                unit->setHasAttacked(false);
+                unit->setHasMoved(false);
+            }
+        }
+    }
+
+    // set currentPlayer pointer
+    //-------------------------------------------------
+    nextPlayer();
+
+
+    // set income calculation based on house count
+    int actualVal = currentPlayer->getCurrency();
+    currentPlayer->setCurrency(actualVal + 1000 * currentPlayer->getActiveHouses());
+
+}
 
 std::vector<std::vector<int>> WarState::csvToMap(const string &filename) {
     std::vector<std::vector<int>> map;

@@ -15,6 +15,7 @@
 #include "Map/Paths.h"
 #include "Units/CombatCalculator.h"
 #include "Buildings/Building.h"
+#include "UI/ActionMenu.h"
 
 
 class ExampleGame;
@@ -39,6 +40,8 @@ class WarState : public ExampleGameState {
 public:
 
 	TTF_Font *_indexFont;
+    ActionMenu actionMenu;
+
 	Paths *paths;
     Player *currentPlayer;
     std::vector<Player*>players;

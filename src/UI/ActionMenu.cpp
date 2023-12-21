@@ -3,6 +3,12 @@
 void ActionMenu::generateOptions(Unit *selected, const std::vector<std::vector<Unit *>> &unitMap) {
     SDL_Point coordinates = selected->getCoordinates();
 
+    _options.clear();
+
+    _options.emplace_back([selected]() {
+        selected->setHasMoved(true);
+    });
+
     std::vector<SDL_Point> directions = {{0,  -1},
                                          {0,  1},
                                          {-1, 0},
@@ -18,10 +24,16 @@ void ActionMenu::generateOptions(Unit *selected, const std::vector<std::vector<U
 
             if (neighborUnit && neighborUnit->getTeam() != selected->getTeam()) {
                 _options.emplace_back([selected, neighborUnit]() {
-                    //selected->attack(*neighborUnit);
+                    selected->attack(*neighborUnit);
                 });
             }
         }
     }
 
+}
+
+void ActionMenu::drawUI() {
+    if(_options.empty() || !_isVisible) {
+        return;
+    }
 }
