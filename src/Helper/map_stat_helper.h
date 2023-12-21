@@ -7,6 +7,8 @@
 #include <vector>
 #include <unordered_map>
 
+class Unit;
+
 class MapStats {
 public:
     static MapStats &getInstance(std::vector<std::vector<std::vector<int>>> *map, std::vector<std::vector<Unit *>> *unitMap);

@@ -15,6 +15,7 @@
 #include "Map/Paths.h"
 #include "Units/CombatCalculator.h"
 #include "Buildings/Building.h"
+#include "UI/ActionMenu.h"
 
 
 class ExampleGame;
@@ -39,6 +40,8 @@ class WarState : public ExampleGameState {
 public:
 
 	TTF_Font *_indexFont;
+    ActionMenu actionMenu;
+
 	Paths *paths;
     Player *currentPlayer;
     std::vector<Player*>players;
@@ -94,7 +97,7 @@ public:
 
     // Drawing
 
-    void drawTile(int tileIndex, SDL_Rect &destRect,int imgSizeX,int tileSize = 16);
+    void drawTile(int tileIndex, SDL_Rect &destRect,int imgSizeX,int tileSizeInTileset = 16);
 
     void renderTileset(TTF_Font *font, SDL_Point imgSize, int tileSize = 16);
 
