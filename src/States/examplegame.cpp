@@ -2,12 +2,40 @@
 
 constexpr bool doBenchmark = true;
 
+SDL_Point getGameDimensions(const std::string& filePath) {
+    std::ifstream file(filePath);
+    std::string line;
+    int row = 0;
+    int col = 0;
+
+    while (std::getline(file, line)) {
+        std::istringstream lineStream(line);
+        std::string cell;
+        int currentColCount = 0;
+
+        while (std::getline(lineStream, cell, ',')) {
+            currentColCount++;
+        }
+
+        if (row == 0) {
+            col = currentColCount;
+        }
+
+        row++;
+    }
+
+    return {col * TILE_SIZE, row * TILE_SIZE};
+}
+
 ExampleGame::ExampleGame()
-        : Game("Warcrimes", {15 * 32, 11 * 32}, false) {
+        : Game("Warcrimes",getGameDimensions(BasePath "asset/map/pvp/bg.csv"), false) {
     // Will be freed in Game dtor
     allStates = {
             new WarState(*this, renderer)
     };
+
+
+
 
     // The virtual call is ok here
     SetNextState(0);

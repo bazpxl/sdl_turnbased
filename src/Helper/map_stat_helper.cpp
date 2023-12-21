@@ -1,6 +1,7 @@
 #include <limits>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include "map_stat_helper.h"
 
 MapStats::MapStats(std::vector<std::vector<std::vector<int>>>* map,

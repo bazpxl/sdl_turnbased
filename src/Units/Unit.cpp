@@ -30,10 +30,10 @@ void Unit::draw() {
             16
     };
     SDL_Rect destRect = {
-            _coordinates.x * 32,
-            _coordinates.y * 32,
-            32,
-            32
+            _coordinates.x * TILE_SIZE,
+            _coordinates.y * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
     };
     if (_finishedTurn || _hasMoved) {
         SDL_SetTextureColorMod(_texture, 128, 128, 128);

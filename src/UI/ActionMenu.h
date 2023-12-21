@@ -11,6 +11,8 @@ class ActionMenu {
 private:
     Player * _currentPlayer;
     std::vector<std::function<void()>> _options;
+    std::vector<SDL_Point> _optionCoordinates;
+    std::vector<std::string> _optionTexts;
 public:
     bool _isVisible = false;
     void generateOptions(Unit * selected, const std::vector<std::vector<Unit*>>& unitMap);

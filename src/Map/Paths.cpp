@@ -175,14 +175,14 @@ void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius,std::unordered_m
         srcRect.x = int(_offset) * 32;
         srcRect.y = 176;
 
-        destRect.w = destRect.h = 16 * 2 - 2;
+        destRect.w = destRect.h = TILE_SIZE - 2;
 
         for (auto &i: radius) {
             if (_attackRadius.find(i._coordinates) != _attackRadius.end()) {
                 _attackRadius.erase(i._coordinates);
             }
-            destRect.x = i._coordinates.x * 16 * 2 + 1;
-            destRect.y = i._coordinates.y * 16 * 2 + 1;
+            destRect.x = i._coordinates.x * TILE_SIZE + 1;
+            destRect.y = i._coordinates.y * TILE_SIZE + 1;
             //_offset = (_offset + 1) % 3;
             SDL_SetTextureColorMod(texture, 255,205,101);
             SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
@@ -192,8 +192,8 @@ void Paths::drawMoveRadius(u32 frame, std::vector<Node> &radius,std::unordered_m
             SDL_RenderDrawRect(renderer, &destRect);
         }
         for(auto &i: _attackRadius){
-            destRect.x = i.first.x * 16 * 2 + 1;
-            destRect.y = i.first.y * 16 * 2 + 1;
+            destRect.x = i.first.x * TILE_SIZE + 1;
+            destRect.y = i.first.y * TILE_SIZE + 1;
             if(i.second == 0){
                 SDL_SetTextureColorMod(texture, 205,74,49);
                 SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
@@ -219,7 +219,7 @@ void drawTile(int tileIndex, SDL_Rect &destRect, int imgSizeX, int tileSize) {
     srcRect.x = (tileIndex % tilesPerRow) * tileSize;
     srcRect.y = (tileIndex / tilesPerRow) * tileSize;
 
-    destRect.w = destRect.h = 32;
+    destRect.w = destRect.h = TILE_SIZE;
 
     SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
 }
@@ -289,8 +289,8 @@ void Paths::drawPath(std::vector<SDL_Point> &path) {
     for (size_t i = 0; i < renderQueue.size(); i++) {
         const int tileIndex = renderQueue[i];
         SDL_Rect destRect;
-        destRect.x = path[i].x * 32;
-        destRect.y = path[i].y * 32;
+        destRect.x = path[i].x * TILE_SIZE;
+        destRect.y = path[i].y * TILE_SIZE;
         drawTile(tileIndex, destRect, 512, 16);
     }
 }

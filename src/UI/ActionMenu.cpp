@@ -37,3 +37,9 @@ void ActionMenu::drawUI() {
         return;
     }
 }
+
+void ActionMenu::selectOption(int index) {
+    if(index < static_cast<int>(_options.size())) {
+        _options[index]();
+    }
+}

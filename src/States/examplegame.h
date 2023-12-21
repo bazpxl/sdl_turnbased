@@ -97,7 +97,7 @@ public:
 
     // Drawing
 
-    void drawTile(int tileIndex, SDL_Rect &destRect,int imgSizeX,int tileSize = 16);
+    void drawTile(int tileIndex, SDL_Rect &destRect,int imgSizeX,int tileSizeInTileset = 16);
 
     void renderTileset(TTF_Font *font, SDL_Point imgSize, int tileSize = 16);
 
