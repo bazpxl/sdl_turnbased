@@ -9,7 +9,7 @@
 
 class ActionMenu {
 private:
-    Player * _currentPlayer;
+    [[maybe_unused]] Player * _currentPlayer;
     std::vector<std::function<void()>> _options;
     std::vector<SDL_Point> _optionCoordinates;
     std::vector<std::string> _optionTexts;

@@ -17,8 +17,8 @@ void ActionMenu::generateOptions(Unit *selected, const std::vector<std::vector<U
     for (auto &dir: directions) {
         SDL_Point neighborCoord = {coordinates.x + dir.x, coordinates.y + dir.y};
 
-        if (neighborCoord.x >= 0 && neighborCoord.x < unitMap[0].size() &&
-            neighborCoord.y >= 0 && neighborCoord.y < unitMap.size()) {
+        if (neighborCoord.x >= 0 && neighborCoord.x < static_cast<int>(unitMap[0].size()) &&
+            neighborCoord.y >= 0 && neighborCoord.y < static_cast<int>(unitMap.size())) {
 
             Unit *neighborUnit = unitMap[neighborCoord.y][neighborCoord.x];
 

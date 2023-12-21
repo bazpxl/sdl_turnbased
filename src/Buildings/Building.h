@@ -9,7 +9,7 @@ public:
     Building(int tileIndex, TileType type, SDL_Point coordinates);
 private:
     Unit *_capturing;
-    int _captureProgess = 20;
+    [[maybe_unused]] int _captureProgess = 20;
     int _team;
     int _tileIndex;
     TileType _type;

@@ -1,6 +1,6 @@
 #include "examplegame.h"
 
-constexpr bool doBenchmark = true;
+[[maybe_unused]] constexpr bool doBenchmark = true;
 
 SDL_Point getGameDimensions(const std::string& filePath) {
     std::ifstream file(filePath);

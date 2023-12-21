@@ -42,15 +42,15 @@ void WarState::Init() {
 
     _indexFont = TTF_OpenFont(BasePath "asset/font/kenvector_future_thin.ttf", 10);
 
-	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0});
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
 
 	SDL_FreeSurface(textSurface);
@@ -417,7 +417,7 @@ void WarState::drawInterface()
 			// Create TTF-font surface and render currency-val
 			// ---------------------------------------------------------------
 			std::string currency = std::to_string( currentPlayer->getCurrency() );
-			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 } );
+			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 ,255} );
 			SDL_Texture * curTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
 
 			destRect = { winSize.x - TILE_SIZE + 20, winSize.y - TILE_SIZE, TILE_SIZE, TILE_SIZE };
