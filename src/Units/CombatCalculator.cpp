@@ -20,6 +20,7 @@ float CombatCalculator::calculateDamage(const Unit& attacker, const Unit& defend
     const float damage = (baseDamage + luck - badLuck) * attackerHP / 10 * (
                              (200 - (defenseVT + defenseTl * defenderHP)) / 100.f);
 
+    std::cout << "Damage: " << damage << std::endl;
     return damage;
 }
 

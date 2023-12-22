@@ -10,20 +10,20 @@
 
 class ActionMenu {
 private:
-    Player* _currentPlayer{};
     std::vector<std::function<void()>> _options;
-    std::vector<Button> _buttons;
+    std::vector<std::unique_ptr<Button>> _buttons;
     TTF_Font* _font;
 
 
 public:
 
-    ActionMenu() : _font(nullptr), _currentPlayer(nullptr) {}
-    ActionMenu(Player* currentPlayer, TTF_Font* font);
+    ActionMenu() :  _font(nullptr) {}
+    explicit ActionMenu(TTF_Font* font);
     bool _isVisible = false;
     void generateOptions(Unit * selected, const std::vector<std::vector<Unit*>>& unitMap);
     void drawUI();
     void handleEvent(const SDL_Event& e);
+    void Test();
 };
 
 

@@ -8,8 +8,8 @@
 #include "Helper/render_singleton.h"
 
 
-Button::Button(SDL_Rect pos, bool shadow, std::string text, TTF_Font *font) : buttonText(std::move(text)), buttonFont(font),
-                                                                                     textTexture(nullptr) {
+Button::Button(SDL_Rect pos, bool shadow, std::string text, TTF_Font *font) : buttonText(std::move(text)), textTexture(nullptr),
+                                                                                     buttonFont(font) {
     rect = pos;
     state = State::NORMAL;
     setText(buttonText);
@@ -75,31 +75,54 @@ void Button::setText(const std::string &text) {
 
 
 void Button::render() {
+    // Hintergrund des Buttons rendern
+    SDL_Texture* currentTexture = nullptr;
     switch (state) {
         case State::NORMAL:
-            SDL_RenderCopy(RS::getInstance().get(), textureNormal, nullptr, &rect);
+            SDL_SetTextureColorMod(currentTexture, 217, 163, 134);
+            currentTexture = textureNormal;
             break;
         case State::PRESSED:
             SDL_SetTextureColorMod(texturePressed, 255, 0, 0);
-            SDL_RenderCopy(RS::getInstance().get(), texturePressed, nullptr, &rect);
-            SDL_SetTextureColorMod(texturePressed, 255, 255, 255);
+            currentTexture = texturePressed;
             break;
         case State::HOVER:
             SDL_SetTextureColorMod(textureNormal, 255, 0, 0);
-            SDL_RenderCopy(RS::getInstance().get(), textureNormal, nullptr, &rect);
-            SDL_SetTextureColorMod(textureNormal, 255, 255, 255);
+            currentTexture = textureNormal;
             break;
         case State::DISABLED:
+            // Optional: Behandlung des deaktivierten Zustands
             break;
     }
+    if (currentTexture) {
+        SDL_RenderCopy(RS::getInstance().get(), currentTexture, nullptr, &rect);
+        SDL_SetTextureColorMod(currentTexture, 217, 163, 134);
+    }
+
     if (textTexture) {
         int textWidth, textHeight;
         SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight);
-        SDL_Rect textRect = {rect.x + (rect.w - textWidth) / 2, rect.y + (rect.h - textHeight) / 2, textWidth,
-                             textHeight};
+
+        // Offset vom Rand
+        const int offset = 15;
+
+        float scaleX = static_cast<float>(rect.w - 2 * offset) / textWidth;
+        float scaleY = static_cast<float>(rect.h - 2 * offset) / textHeight;
+        float scale = std::min(scaleX, scaleY);
+
+        int newTextWidth = static_cast<int>(textWidth * scale);
+        int newTextHeight = static_cast<int>(textHeight * scale);
+
+        SDL_Rect textRect = {
+                rect.x + (rect.w - newTextWidth) / 2,
+                rect.y + (rect.h - newTextHeight) / 2,
+                newTextWidth,
+                newTextHeight
+        };
         SDL_RenderCopy(RS::getInstance().get(), textTexture, nullptr, &textRect);
     }
 }
+
 
 
 void Button::setOnClick(std::function<void()> callback) {
@@ -107,7 +130,7 @@ void Button::setOnClick(std::function<void()> callback) {
 }
 
 SDL_Texture *Button::createTextTexture(SDL_Renderer *renderer, const string &text) {
-    SDL_Color textColor = {255, 255, 255};
+    SDL_Color textColor = {0, 0, 0, 255};
     SDL_Surface *textSurface = TTF_RenderText_Blended(buttonFont, text.c_str(), textColor);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_FreeSurface(textSurface);

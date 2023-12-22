@@ -55,7 +55,7 @@ void WarState::Init() {
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
 
 	SDL_FreeSurface(textSurface);
-    actionMenu = ActionMenu(currentPlayer, _indexFont);
+    actionMenu = ActionMenu(_indexFont);
 }
 
 void WarState::UnInit() {
@@ -124,6 +124,8 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
     if (actionMenu._isVisible) {
         actionMenu.drawUI();
     }
+    //b->render();
+    //actionMenu.Test();
 }
 
 /* ##############################################

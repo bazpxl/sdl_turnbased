@@ -10,11 +10,11 @@ void ActionMenu::generateOptions(Unit* selected, const std::vector<std::vector<U
     _options.emplace_back([selected, this]() {
         selected->setHasMoved(true);
         ActionMenu::_isVisible = false;
-
     });
-    Button waitButton({100,100,300,50}, false, "Warten", _font);
-    waitButton.setOnClick(_options.back());
-    _buttons.push_back(waitButton);
+
+    _buttons.push_back(std::make_unique<Button>(SDL_Rect{100, 100 , 150, 65}, false, "Warten", _font));
+    _buttons.back()->setOnClick(_options.back());
+
 
     int counter = 2;
     std::vector<SDL_Point> directions = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
@@ -26,16 +26,15 @@ void ActionMenu::generateOptions(Unit* selected, const std::vector<std::vector<U
 
             Unit* neighborUnit = unitMap[neighborCoord.y][neighborCoord.x];
             if (neighborUnit && neighborUnit->getTeam() != selected->getTeam()) {
-                std::string attackText = "Angriff auf " + neighborUnit->getTypeName();
+                std::string attackText = "Angriff: " + neighborUnit->getTypeName();
                 _options.emplace_back([selected, neighborUnit, this]() {
                     selected->attack(*neighborUnit);
                     ActionMenu::_isVisible = false;
+                    selected->setHasMoved(true);
                 });
 
-
-                Button attackButton({100,100 * counter,300,50}, false, attackText, _font);
-                attackButton.setOnClick(_options.back());
-                _buttons.push_back(attackButton);
+                _buttons.push_back(std::make_unique<Button>(SDL_Rect{100, 65 * counter, 150, 65}, false, attackText, _font));
+                _buttons.back()->setOnClick(_options.back());
                 counter++;
             }
         }
@@ -48,17 +47,22 @@ void ActionMenu::drawUI() {
     }
 
     for (auto& button : _buttons) {
-        button.render();
+        button->render();
     }
 }
 
 void ActionMenu::handleEvent(const SDL_Event &e) {
     for (auto& button : _buttons) {
-        button.handleEvent(e);
+        button->handleEvent(e);
     }
 }
 
-ActionMenu::ActionMenu(Player *currentPlayer, TTF_Font *font) : _currentPlayer(currentPlayer), _font(font) {
+ActionMenu::ActionMenu(TTF_Font *font) :  _font(font) {
 }
 
+void ActionMenu::Test() {
+    Button testButton({100,100,300,50}, false, "Fest", _font);
+
+    testButton.render();
+}
 
