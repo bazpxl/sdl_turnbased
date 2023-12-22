@@ -46,6 +46,8 @@ public:
 
     virtual void draw();
 
+    std::string getTypeName() const;
+
     static void setTexture(SDL_Texture *texture);
 
     static void setUnitMap(std::vector<std::vector<Unit*>> *unitMap);

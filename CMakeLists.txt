@@ -203,7 +203,10 @@ add_executable( sdl_basegame
         src/UI/ActionMenu.cpp
         src/UI/ActionMenu.h
         src/Buildings/Building.cpp
-        src/Buildings/Building.h)
+        src/Buildings/Building.h
+        src/UI/Buttons.cpp
+        src/UI/Buttons.h
+        src/UI/Buttons.h)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")
