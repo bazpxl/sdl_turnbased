@@ -1,6 +1,7 @@
 #include "../global.h"
 #include "player.h"
 #include "Units/Unit.h"
+#include "Buttons.h"
 #include <functional>
 
 #ifndef SDL_BASEGAME_ACTIONMENU_H
@@ -9,15 +10,20 @@
 
 class ActionMenu {
 private:
-    Player * _currentPlayer;
     std::vector<std::function<void()>> _options;
-    std::vector<SDL_Point> _optionCoordinates;
-    std::vector<std::string> _optionTexts;
+    std::vector<std::unique_ptr<Button>> _buttons;
+    TTF_Font* _font;
+
+
 public:
+
+    ActionMenu() :  _font(nullptr) {}
+    explicit ActionMenu(TTF_Font* font);
     bool _isVisible = false;
     void generateOptions(Unit * selected, const std::vector<std::vector<Unit*>>& unitMap);
     void drawUI();
-    void selectOption(int index);
+    void handleEvent(const SDL_Event& e);
+    void Test();
 };
 
 

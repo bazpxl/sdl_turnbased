@@ -2,7 +2,7 @@
 
 Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, int startY, int team, int moveRange,
            int attackRange, int offset, int fuel,
-           int maxFuel, int ammo, int maxAmmo , int price, bool canAttack) :
+           int maxFuel, int ammo, int maxAmmo, int price, bool canAttack) :
         _type(type),
         _movementType(movementType),
         _coordinates({x, y}),
@@ -17,7 +17,7 @@ Unit::Unit(UnitType type, MovementType movementType, int x, int y, int startX, i
         _ammo(ammo),
         _maxAmmo(maxAmmo),
         _price(price),
-        _canAttack(canAttack){
+        _canAttack(canAttack) {
     _renderer = RS::getInstance().get();
 
 }
@@ -143,17 +143,23 @@ SDL_Texture *Unit::_texture = nullptr;
 void Unit::setTexture(SDL_Texture *texture) {
     _texture = texture;
 }
-std::vector<std::vector<Unit*>> *Unit::_unitMap = nullptr;
-void Unit::setUnitMap(std::vector<std::vector<Unit*>> *unitMap) {
+
+std::vector<std::vector<Unit *>> *Unit::_unitMap = nullptr;
+
+void Unit::setUnitMap(std::vector<std::vector<Unit *>> *unitMap) {
     _unitMap = unitMap;
 }
 
 // Necessary for static member
-CombatCalculator* Unit::_cc = nullptr;
+CombatCalculator *Unit::_cc = nullptr;
 
 void Unit::attack(Unit &other) {
+    std::cout << "Attack" << std::endl;
     _hasAttacked = true;
     int dmg = static_cast<int>(_cc->calculateDamage(*this, other));
+    std::cout << "Damage: " << dmg << std::endl;
+    std::cout << "Attacker: " << this->getHp() << std::endl;
+    std::cout << "Defender: " << other.getHp() << std::endl;
     other.setHp(other.getHp() - dmg);
     if (other.getHp() <= 0) {
         _unitMap->at(other.getCoordinates().y).at(other.getCoordinates().x) = nullptr;
@@ -162,11 +168,15 @@ void Unit::attack(Unit &other) {
 
     other.counterAttack(*this);
 
+
 }
 
 void Unit::counterAttack(Unit &other) {
-
+    std::cout << "Counter Attack" << std::endl;
     int dmg = static_cast<int>(_cc->calculateDamage(other, *this));
+    std::cout << "Damage: " << dmg << std::endl;
+    std::cout << "Attacker: " << this->getHp() << std::endl;
+    std::cout << "Defender: " << other.getHp() << std::endl;
     this->setHp(this->getHp() - dmg);
     if (this->getHp() <= 0) {
         _unitMap->at(this->getCoordinates().y).at(this->getCoordinates().x) = nullptr;
@@ -177,64 +187,115 @@ void Unit::setCombatCalculator(CombatCalculator *cc) {
     _cc = cc;
 }
 
-Infantry::Infantry(const int x,const int y,const int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y, 16 * 16, 6 * 16,
-                                                        team, 3, 4,0, 99, 99, 99,
-                                                        99, 1000) {}
+std::string Unit::getTypeName() const {
+    switch (_type) {
+        case UnitType::INFANTRY:
+            return "Infantry";
+        case UnitType::MECH:
+            return "Mech";
+        case UnitType::RECON:
+            return "Recon";
+        case UnitType::TANK:
+            return "Tank";
+        case UnitType::MEDIUM_TANK:
+            return "Medium Tank";
+        case UnitType::APC:
+            return "APC";
+        case UnitType::ARTILLERY:
+            return "Artillery";
+        case UnitType::ROCKET:
+            return "Rocket";
+        case UnitType::ANTI_AIR:
+            return "Anti-Air";
+        case UnitType::MISSILE:
+            return "Missile";
+        case UnitType::BATTLE_COPTER:
+            return "Battle Copter";
+        case UnitType::TRANSPORT_COPTER:
+            return "Transport Copter";
+        case UnitType::FIGHTER:
+            return "Fighter";
+        case UnitType::BOMBER:
+            return "Bomber";
+        case UnitType::LANDER:
+            return "Lander";
+        case UnitType::CRUISER:
+            return "Cruiser";
+        case UnitType::SUBMARINE:
+            return "Submarine";
+        case UnitType::BATTLESHIP:
+            return "Battleship";
+        default:
+            return "Unknown";
+    }
+}
 
-Mech::Mech(const int x,const int y,const int team) : Unit(UnitType::MECH, MovementType::MECH, x, y, 17 * 16, 6 * 16, team, 2, 3,0, 70, 70, 70,
-                                          3, 3000) {}
+Infantry::Infantry(const int x, const int y, const int team) : Unit(UnitType::INFANTRY, MovementType::INFANTRY, x, y,
+                                                                    16 * 16, 6 * 16,
+                                                                    team, 3, 4, 0, 99, 99, 99,
+                                                                    99, 1000) {}
+
+Mech::Mech(const int x, const int y, const int team) : Unit(UnitType::MECH, MovementType::MECH, x, y, 17 * 16, 6 * 16,
+                                                            team, 2, 3, 0, 70, 70, 70,
+                                                            3, 3000) {}
 
 // ggf anderer TireType
-Recon::Recon(const int x,const int y,const int team) : Unit(UnitType::RECON, MovementType::TIRE_A, x, y, 18 * 16, 6 * 16, team, 8, 1,0,
-                                            80, 80, 80, 8, 4000) {}
+Recon::Recon(const int x, const int y, const int team) : Unit(UnitType::RECON, MovementType::TIRE_A, x, y, 18 * 16,
+                                                              6 * 16, team, 8, 1, 0,
+                                                              80, 80, 80, 8, 4000) {}
 
-Tank::Tank(int x, int y, int team) : Unit(UnitType::TANK, MovementType::TREAD, x, y, 19 * 16, 6 * 16, team, 6, 1,0, 99, 99,99,
+Tank::Tank(int x, int y, int team) : Unit(UnitType::TANK, MovementType::TREAD, x, y, 19 * 16, 6 * 16, team, 6, 1, 0, 99,
+                                          99, 99,
                                           9, 7000) {}
 
 MediumTank::MediumTank(int x, int y, int team) : Unit(UnitType::MEDIUM_TANK, MovementType::TREAD, x, y, 20 * 16, 6 * 16,
-                                                      team, 5, 1,0, 70, 70, 70, 8, 12000) {}
+                                                      team, 5, 1, 0, 70, 70, 70, 8, 12000) {}
 
-APC::APC(int x, int y, int team) : Unit(UnitType::APC, MovementType::TREAD, x, y, 21 * 16, 6 * 16, team, 6, 1,0, 70, 70, 70, 8,
+APC::APC(int x, int y, int team) : Unit(UnitType::APC, MovementType::TREAD, x, y, 21 * 16, 6 * 16, team, 6, 1, 0, 70,
+                                        70, 70, 8,
                                         5000) {}
 
 Artillery::Artillery(int x, int y, int team) : Unit(UnitType::ARTILLERY, MovementType::TREAD, x, y, 22 * 16, 6 * 16,
-                                                    team, 5, 2,0, 99, 99, 99, 9, 6000) {}
+                                                    team, 5, 2, 0, 99, 99, 99, 9, 6000) {}
 
-Rocket::Rocket(int x, int y, int team) : Unit(UnitType::ROCKET, MovementType::AIR, x, y, 23 * 16, 6 * 16, team, 5, 3,0, 99, 99,
-                                                99, 9, 15000) {}
+Rocket::Rocket(int x, int y, int team) : Unit(UnitType::ROCKET, MovementType::AIR, x, y, 23 * 16, 6 * 16, team, 5, 3, 0,
+                                              99, 99,
+                                              99, 9, 15000) {}
 
 AntiAir::AntiAir(int x, int y, int team) : Unit(UnitType::ANTI_AIR, MovementType::TREAD, x, y, 24 * 16, 6 * 16, team, 6,
-                                                  1,0, 99, 99, 99, 9, 8000) {}
+                                                1, 0, 99, 99, 99, 9, 8000) {}
 
 Missiles::Missiles(int x, int y, int team) : Unit(UnitType::MISSILE, MovementType::AIR, x, y, 25 * 16, 6 * 16, team,
-                                                    5, 5,0, 99, 99, 99, 9, 12000) {}
+                                                  5, 5, 0, 99, 99, 99, 9, 12000) {}
 
 BattleCopter::BattleCopter(int x, int y, int team) : Unit(UnitType::BATTLE_COPTER, MovementType::AIR, x, y, 26 * 16,
-                                                              6 * 16, team, 6, 1,0, 99, 99, 99, 9, 9000) {}
+                                                          6 * 16, team, 6, 1, 0, 99, 99, 99, 9, 9000) {}
 
 TransportCopter::TransportCopter(int x, int y, int team) : Unit(UnitType::TRANSPORT_COPTER, MovementType::AIR, x, y,
-                                                                    27 * 16, 6 * 16, team, 6, 0,0, 99, 99, 99, 9,
-                                                                    5000) {}
+                                                                27 * 16, 6 * 16, team, 6, 0, 0, 99, 99, 99, 9,
+                                                                5000) {}
 
-Fighter::Fighter(int x, int y, int team) : Unit(UnitType::FIGHTER, MovementType::AIR, x, y, 28 * 16, 6 * 16, team, 9, 1,0,
-                                                  99, 99, 99, 9, 20000) {}
+Fighter::Fighter(int x, int y, int team) : Unit(UnitType::FIGHTER, MovementType::AIR, x, y, 28 * 16, 6 * 16, team, 9, 1,
+                                                0,
+                                                99, 99, 99, 9, 20000) {}
 
-Bomber::Bomber(int x, int y, int team) : Unit(UnitType::BOMBER, MovementType::AIR, x, y, 29 * 16, 6 * 16, team, 7, 1,0, 99, 99,
-                                                99, 9, 22000) {}
+Bomber::Bomber(int x, int y, int team) : Unit(UnitType::BOMBER, MovementType::AIR, x, y, 29 * 16, 6 * 16, team, 7, 1, 0,
+                                              99, 99,
+                                              99, 9, 22000) {}
 
-Lander::Lander(int x, int y, int team) : Unit(UnitType::LANDER, MovementType::SEA, x, y, 30 * 16, 6 * 16, team, 6, 0,0, 99, 99,
-                                                99, 9, 12000) {}
+Lander::Lander(int x, int y, int team) : Unit(UnitType::LANDER, MovementType::SEA, x, y, 30 * 16, 6 * 16, team, 6, 0, 0,
+                                              99, 99,
+                                              99, 9, 12000) {}
 
-Cruiser::Cruiser(int x, int y, int team) : Unit(UnitType::CRUISER, MovementType::SEA, x, y, 31 * 16, 6 * 16, team, 5, 0,0,
-                                                  99, 99, 99, 9, 18000) {}
+Cruiser::Cruiser(int x, int y, int team) : Unit(UnitType::CRUISER, MovementType::SEA, x, y, 31 * 16, 6 * 16, team, 5, 0,
+                                                0,
+                                                99, 99, 99, 9, 18000) {}
 
 Submarine::Submarine(int x, int y, int team) : Unit(UnitType::SUBMARINE, MovementType::SEA, x, y, 32 * 16, 6 * 16, team,
-                                                      5, 0,0, 99, 99, 99, 9, 20000) {}
+                                                    5, 0, 0, 99, 99, 99, 9, 20000) {}
 
 Battleship::Battleship(int x, int y, int team) : Unit(UnitType::BATTLESHIP, MovementType::SEA, x, y, 33 * 16, 6 * 16,
-                                                          team, 5, 0,0, 99, 99, 99, 9, 28000) {}
-
-
+                                                      team, 5, 0, 0, 99, 99, 99, 9, 28000) {}
 
 
 std::unique_ptr<Unit> UnitFactory::createUnit(UnitType type, int x, int y, int team) {

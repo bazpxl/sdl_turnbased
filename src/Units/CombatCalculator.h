@@ -2,7 +2,8 @@
 #define SDL_BASEGAME_COMBATCALCULATOR_H
 #include "../Helper/map_stat_helper.h"
 #include "Unit.h"
-
+#include "global.h"
+#include <iostream>
 class Unit;
 class MapStats;
 

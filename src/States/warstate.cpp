@@ -1,6 +1,7 @@
 #include "examplegame.h"
+#include "UI/Buttons.h"
 
-
+Button *b;
 bool operator==(const SDL_Point &lhs, const SDL_Point &rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
@@ -15,7 +16,7 @@ void WarState::Init() {
     // all map initializations
     initMap();
 
-    actionMenu = ActionMenu();
+
 
 
     RS::getInstance().setUnitmap(unitMap);
@@ -40,20 +41,21 @@ void WarState::Init() {
 		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
 	}
 
-    _indexFont = TTF_OpenFont(BasePath "asset/font/kenvector_future_thin.ttf", 10);
+    _indexFont = TTF_OpenFont(BasePath "asset/font/kenvector_future_thin.ttf", 100);
 
-	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0});
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0});
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
 
 	SDL_FreeSurface(textSurface);
+    actionMenu = ActionMenu(_indexFont);
 }
 
 void WarState::UnInit() {
@@ -73,24 +75,30 @@ void WarState::UnInit() {
 bool WarState::HandleEvent(const Event &event) {
     updateMouseIndex(event);
 
+
     if (isLeftMouseButtonDown(event)) {
         handleLeftMouseButtonDown();
-        units[0]->attack(*units[1]);
     }
 
     if (isLeftMouseButtonUp(event)) {
         handleLeftMouseButtonUp();
     }
 
+    if (actionMenu._isVisible) {
+        actionMenu.handleEvent(event);
+        return false;
+    }
+
+    if (event.type == SDL_KEYDOWN){
+        const Keysym &what_key = event.key.keysym;
+        if(what_key.scancode == SDL_SCANCODE_SPACE)
+            endRound();
+    }
+
+
+
     processUnitSelectionAndMovement(event);
 
-	// End Current Round
-	// --------------------------------------------------------------------
-	if (event.type == SDL_KEYDOWN){
-		const Keysym &what_key = event.key.keysym;
-		if(what_key.scancode == SDL_SCANCODE_SPACE)
-			endRound();
-	}
 
     return false;
 }
@@ -113,6 +121,11 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
 
 	drawInterface();
 
+    if (actionMenu._isVisible) {
+        actionMenu.drawUI();
+    }
+    //b->render();
+    //actionMenu.Test();
 }
 
 /* ##############################################
@@ -338,11 +351,14 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
         if (!sameClick && isLeftMouseButtonDown(event) && paths->mouseInRadius(mouseIndex, radius) &&
             mouseIndex != selected->getCoordinates()) {
+
             unitMap[selected->getCoordinates().y][selected->getCoordinates().x] = nullptr;
             unitMap[mouseIndex.y][mouseIndex.x] = selected;
             selected->setCoordinates(mouseIndex.x, mouseIndex.y);
-            selected->setHasMoved(true);
+            actionMenu.generateOptions(selected, unitMap);
+            actionMenu._isVisible = true;
             sameClick = true;
+
             clearSelectionAndPath();
         } else if (isLeftMouseButtonDown(event) && !paths->mouseInRadius(mouseIndex, radius)) {
             clearSelectionAndPath();
@@ -417,7 +433,7 @@ void WarState::drawInterface()
 			// Create TTF-font surface and render currency-val
 			// ---------------------------------------------------------------
 			std::string currency = std::to_string( currentPlayer->getCurrency() );
-			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 } );
+			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 ,255} );
 			SDL_Texture * curTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
 
 			destRect = { winSize.x - TILE_SIZE + 20, winSize.y - TILE_SIZE, TILE_SIZE, TILE_SIZE };
