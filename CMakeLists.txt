@@ -206,7 +206,7 @@ add_executable( sdl_basegame
         src/Buildings/Building.h
         src/UI/Buttons.cpp
         src/UI/Buttons.h
-        src/UI/Buttons.h)
+        src/UI/Buttons.h "src/States/mapstate.cpp")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "IPO / LTO disabled")
