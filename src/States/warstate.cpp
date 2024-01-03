@@ -241,6 +241,8 @@ void WarState::drawUnits() {
         for (auto &unit: row) {
             if (unit != nullptr) {
                 unit->draw();
+                if (unit->getTeam() == currentPlayer->getTeam())
+                    unit->showHealth();
             }
         }
     }

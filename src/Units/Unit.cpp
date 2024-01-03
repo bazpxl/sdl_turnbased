@@ -42,6 +42,28 @@ void Unit::draw() {
     SDL_SetTextureColorMod(_texture, 255, 255, 255);
 }
 
+void Unit::showHealth() {
+    SDL_Rect barBackground = {
+            _coordinates.x * TILE_SIZE,
+            _coordinates.y * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE*0.2
+    };
+
+    SDL_SetRenderDrawColor(_renderer, 0,0,0,1);
+    SDL_RenderFillRect(_renderer, &barBackground);
+
+    SDL_Rect bar = {
+        _coordinates.x * TILE_SIZE +2,
+        _coordinates.y * TILE_SIZE +2,
+        TILE_SIZE*((float)getHp()/(float)getMaxHp()) - 4,
+        TILE_SIZE * 0.2 - 4
+    };
+
+    SDL_SetRenderDrawColor(_renderer, 0, 255, 0, 1);
+    SDL_RenderFillRect(_renderer, &bar);
+}
+
 int Unit::getTeam() const {
     return _team;
 }

@@ -43,7 +43,7 @@ public:
 
 
     virtual ~Unit() = default;
-
+    virtual void showHealth();
     virtual void draw();
 
     std::string getTypeName() const;
