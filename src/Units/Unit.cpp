@@ -154,8 +154,12 @@ void Unit::setUnitMap(std::vector<std::vector<Unit *>> *unitMap) {
 CombatCalculator *Unit::_cc = nullptr;
 
 void Unit::attack(Unit &other) {
+    std::cout << "Attack" << std::endl;
     _hasAttacked = true;
     int dmg = static_cast<int>(_cc->calculateDamage(*this, other));
+    std::cout << "Damage: " << dmg << std::endl;
+    std::cout << "Attacker: " << this->getHp() << std::endl;
+    std::cout << "Defender: " << other.getHp() << std::endl;
     other.setHp(other.getHp() - dmg);
     if (other.getHp() <= 0) {
         _unitMap->at(other.getCoordinates().y).at(other.getCoordinates().x) = nullptr;
@@ -164,11 +168,15 @@ void Unit::attack(Unit &other) {
 
     other.counterAttack(*this);
 
+
 }
 
 void Unit::counterAttack(Unit &other) {
-
+    std::cout << "Counter Attack" << std::endl;
     int dmg = static_cast<int>(_cc->calculateDamage(other, *this));
+    std::cout << "Damage: " << dmg << std::endl;
+    std::cout << "Attacker: " << this->getHp() << std::endl;
+    std::cout << "Defender: " << other.getHp() << std::endl;
     this->setHp(this->getHp() - dmg);
     if (this->getHp() <= 0) {
         _unitMap->at(this->getCoordinates().y).at(this->getCoordinates().x) = nullptr;
