@@ -20,8 +20,11 @@ void WarState::Init() {
 
     RS::getInstance().init(renderer);
 
+
     // all map initializations
-    initMap();
+    if (initialisiert == 0) {
+        initMap();
+    }
 
 
 
@@ -33,44 +36,44 @@ void WarState::Init() {
     loadTileset("asset/graphic/NewTiles.png");
 
 
-
     // Kann ggf weg
     indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 
-//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2));
-//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 1, 8, 2));
-//	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1));
-//    unitMap[2][13] = infantryUnits[0].get();
-//    unitMap[9][2] = infantryUnits[1].get();
-//    unitMap[8][1] = infantryUnits[2].get();
+    //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2));
+    //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 1, 8, 2));
+    //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1));
+    //    unitMap[2][13] = infantryUnits[0].get();
+    //    unitMap[9][2] = infantryUnits[1].get();
+    //    unitMap[8][1] = infantryUnits[2].get();
+    if (initialisiert == 0) {
+        players.push_back(new Player(20, 20, 4, 1));
+        players.push_back(new Player(20, 20, 4, 2));
+        currentPlayer = players[0];
+        initialisiert = 1;
 
-	players.push_back(new Player(20,20,4,1));
-	players.push_back(new Player(20,20,4,2));
-	currentPlayer = players[0];
-
-	_panelTextures.push_back(IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png"));
-	if (!_panelTextures[0]) {
-		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
-	}
-	_panelTextures.push_back((IMG_LoadTexture(renderer, BasePath"asset/graphic/coin.png")));
-	if (!_panelTextures[1]) {
-		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
-	}
-
+    }   
+    _panelTextures.push_back(IMG_LoadTexture(renderer, BasePath"asset/graphic/panel_beigeLight.png"));
+    if (!_panelTextures[0]) {
+        std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+    }
+    _panelTextures.push_back((IMG_LoadTexture(renderer, BasePath"asset/graphic/coin.png")));
+    if (!_panelTextures[1]) {
+        std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+    }
     _indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
+    SDL_Surface* textSurface = TTF_RenderText_Solid(_indexFont, "def 0", { 0, 0, 0 });
+    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
+    textSurface = TTF_RenderText_Solid(_indexFont, "def 1", { 0, 0, 0 });
+    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
+    textSurface = TTF_RenderText_Solid(_indexFont, "def 2", { 0, 0, 0 });
+    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
+    textSurface = TTF_RenderText_Solid(_indexFont, "def 3", { 0, 0, 0 });
+    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
+    textSurface = TTF_RenderText_Solid(_indexFont, "def 4", { 0, 0, 0 });
+    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
 
-	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0});
-	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0});
-	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0});
-	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0});
-	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
-	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0});
-	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+    SDL_FreeSurface(textSurface);
 
-	SDL_FreeSurface(textSurface);
 }
 
 void WarState::UnInit() {
@@ -116,9 +119,10 @@ bool WarState::HandleEvent(const Event &event) {
         handleLeftMouseButtonDown();
     }
 
-    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT) {
+    if (event.type == SDL_KEYDOWN && event.button.button == SDL_SCANCODE_S) {
         game.SetNextState(1);
     }
+
 
     if (isLeftMouseButtonUp(event)) {
         handleLeftMouseButtonUp();
@@ -144,7 +148,7 @@ void WarState::Update(const u32 frame, const u32 totalMSec, const float deltaT) 
 
 void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) {
     drawMap();
-
+    
     //draw radius and path
     paths->drawMoveRadius(frame, radius, attackRadius);
 
@@ -335,6 +339,7 @@ void WarState::processUnitSelectionAndMovement(const Event &event) {
     }
 }
 
+
 void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
     if (unit && unit->getTeam() == currentPlayer->getTeam() && !unit->hasMoved()) {
@@ -451,12 +456,12 @@ void WarState::drawInterface()
 void WarState::initMap() {
     map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
     map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
-
     initUnitMap();
     loadUnitMap();
+
     // bMap is already initialized as map
     initBuildingMap();
-
+    
     auto ms = MapStats::getInstance(&map, &unitMap);
 
     for (size_t y = 0; y < map[0].size(); y++) {
@@ -469,7 +474,6 @@ void WarState::initMap() {
             }
         }
     }
-
 }
 
 void WarState::loadUnitMap() {

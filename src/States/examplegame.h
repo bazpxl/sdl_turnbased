@@ -21,6 +21,7 @@ class ExampleGame;
 
 class WarState;
 class ShopState;
+class Player;
 
 class ExampleGame final : public Game {
 public:
@@ -38,12 +39,10 @@ public:
 
 class WarState : public ExampleGameState {
 public:
-    Paths *paths;
-    static Player *currentPlayer;
 
 	TTF_Font *_indexFont;
-	Paths *paths;
-    Player *currentPlayer;
+    Paths* paths;
+    inline static Player *currentPlayer = nullptr;
     std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
     std::vector<std::vector<Building*>> buildingMap;
@@ -58,7 +57,7 @@ public:
 
     std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
     CombatCalculator * cc;
-
+    bool initialisiert = 0;
     Unit *selected = nullptr;
     bool mouseDown = false;
     bool sameClick = true;
@@ -131,9 +130,25 @@ public:
 class ShopState : public ExampleGameState
 {
 public:
-    // ctor
-    using ExampleGameState::ExampleGameState;
+    SDL_Surface* imageSurface;
+    SDL_Texture* croppedTexture;
+    TTF_Font* font;
+    SDL_Texture* textTextureGuthaben;
+    SDL_Point guthabenSize;
+    std::array<SDL_Texture*, 2> textTextures;
+    std::array<SDL_Point,2> textureSizes;
 
+    Point p = { 15 * 32, 11 * 32 };
+    Array<SDL_Rect, 2> unitRecs;
+    Array<int, 2> prices = { 1000, 3000 };
+    Array<SDL_Rect, 2> einheiten = { 16 * 16, 16 * 5, 16, 16, 17 * 16, 16 * 5, 16, 16 };
+    Array<Unit, 2> units = { Infantry(3,2,1), Mech(4,5,1) };
+    Array<char[20], 2> unitnames = { "Infantry", "Mech" };
+    SDL_Color textColor = { 255, 255, 255, 255 };
+
+    char textBuffer[250];
+    using ExampleGameState::ExampleGameState;
+    
     void Init() override;
     void UnInit() override;
 
