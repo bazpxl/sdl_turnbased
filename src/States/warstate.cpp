@@ -364,7 +364,7 @@ void WarState::getFactory(const Event& event)
         if (factory->getTeam() == currentPlayer->getTeam())
         {
             mousePositionShop = { mouseIndex.x, mouseIndex.y };
-            std::cout << "hallo" << std::endl;
+            game.SetNextState(1);
         }
     }
 }
@@ -375,10 +375,10 @@ void WarState::setBoughtUnit(const Event& event) {
         if (event.type == SDL_KEYDOWN && event.button.button == SDL_SCANCODE_ESCAPE)
         {
             WarState::shopUnit = 0;
+            return;
         }
         if (isLeftMouseButtonDown(event))
         {
-            mousePositionShop = { 12, 1 };
             if (((mouseIndex.x == mousePositionShop.x-1 || mouseIndex.x == mousePositionShop.x + 1) && mouseIndex.y == mousePositionShop.y) ||
                 ((mouseIndex.y == mousePositionShop.y-1 || mouseIndex.y == mousePositionShop.y + 1) && mouseIndex.x == mousePositionShop.x))
             {
@@ -388,7 +388,6 @@ void WarState::setBoughtUnit(const Event& event) {
                 units.push_back(std::move(unit));
                 unitMap[mouseIndex.y][mouseIndex.x] = units.back().get();
                 currentPlayer->setCurrency(currentPlayer->getCurrency()- unitCost);
-                std::cout << "yes" << std::endl;
                 WarState::shopUnit = 0;
             }
         }
