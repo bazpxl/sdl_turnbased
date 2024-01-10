@@ -32,7 +32,7 @@ void ShopState::Init() {
 
     for (int i = 0; i < unitRecs.size(); i++)
     {
-        snprintf(textBuffer, sizeof(textBuffer), "%s Kosten: %d    HP:%d   Reichweite: %d \nAngriffsreichweite: %d Ammo: %d Fuel: %d",
+        snprintf(textBuffer, sizeof(textBuffer), "%s Kosten: %d    HP:%d   Reichweite: %d \n\nAngriffsreichweite: %d Ammo: %d Fuel: %d",
             unitnames[i], units[i].getPrice(), units[i].getMaxHp(), units[i].getMoveRange(), units[i].getAttackRange(), units[i].getAmmo(), units[i].getFuel());
         textSurface = TTF_RenderText_Solid_Wrapped(font, textBuffer, textColor, 9999);
         textTextures[i] = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -60,11 +60,17 @@ bool ShopState::HandleEvent(const Event& event) {
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
         const SDL_Point mousePos = { event.button.x, event.button.y };
+
+        int i = 1;
         for (auto& buttonRect : unitRecs) {
-            if (SDL_PointInRect(&mousePos, &buttonRect))
+
+            if (SDL_PointInRect(&mousePos, &buttonRect) && WarState::currentPlayer->getCurrency() >= prices[i-1])
             {
-                std::cout << "halloo" << buttonRect.y <<std::endl;
+                WarState::shopUnit = i;
+                game.SetNextState(0);
+                
             }
+            i++;
         }
     }
 	return 0;

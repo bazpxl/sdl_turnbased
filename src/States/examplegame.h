@@ -64,6 +64,9 @@ public:
     std::vector<Paths::Node> radius;
     std::vector<SDL_Point> path;
 
+    inline static int shopUnit = 0;
+    Point mousePositionShop;
+
     using ExampleGameState::ExampleGameState;
 
     void Init() override;
@@ -123,6 +126,8 @@ public:
 
     void processUnitSelectionAndMovement(const Event &event);
 
+    void getFactory(const Event& event);
+    void setBoughtUnit(const Event& event);
     void nextPlayer();
 	void endRound();
 };

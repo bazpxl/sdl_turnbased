@@ -7,6 +7,7 @@
 class Building {
 public:
     Building(int tileIndex, TileType type, SDL_Point coordinates);
+    int getTeam();
 private:
     Unit *_capturing;
     int _captureProgess = 20;
@@ -45,5 +46,7 @@ class BuildingFactory {
 public:
     static std::unique_ptr<Building> createBuilding(TileType type, int tileIndex, SDL_Point coordinates);
 };
+
+
 
 #endif //SDL_BASEGAME_BUILDING_H
