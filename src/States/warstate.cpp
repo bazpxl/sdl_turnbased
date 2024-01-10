@@ -36,9 +36,6 @@ void WarState::Init() {
 
     }
 
-    // Kann ggf weg
-    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
-
 
 	_panelTextures.push_back(IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png"));
 	if (!_panelTextures[0]) {
@@ -363,7 +360,7 @@ void WarState::getFactory(const Event& event)
     auto tileType = ms.getTileType({ mouseIndex.x, mouseIndex.y });
 
     if (tileType == TileType::FACTORY) {
-        factory = buildingMap[mouseIndex.y][mouseIndex.x];
+        factory = buildingMap[mouseIndex.y][mouseIndex.x].get();
         if (factory->getTeam() == currentPlayer->getTeam())
         {
             mousePositionShop = { mouseIndex.x, mouseIndex.y };
@@ -387,9 +384,10 @@ void WarState::setBoughtUnit(const Event& event) {
             {
                 auto type = static_cast<UnitType>(WarState::shopUnit-1);
                 auto unit = UnitFactory::createUnit(type, mouseIndex.x, mouseIndex.y, currentPlayer->getTeam());
+                int unitCost = unit->getPrice();
                 units.push_back(std::move(unit));
                 unitMap[mouseIndex.y][mouseIndex.x] = units.back().get();
-                //currentPlayer->setCurrency(currentPlayer->getCurrency()-);
+                currentPlayer->setCurrency(currentPlayer->getCurrency()- unitCost);
                 std::cout << "yes" << std::endl;
                 WarState::shopUnit = 0;
             }

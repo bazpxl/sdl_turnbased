@@ -57,15 +57,11 @@ bool ExampleGame::HandleEvent(const Event &event) {
                 SetNextState(0);
                 return true;
             }
-
 			else if (what_key.scancode == SDL_SCANCODE_2)
 			{
 				SetNextState(1);
 				return true;
 			}
-
-			break;
-		}
             else if (what_key.scancode == SDL_SCANCODE_3) {
                 // Both Game and GameState can change the State,
                 // but it will only be changed after the current frame
