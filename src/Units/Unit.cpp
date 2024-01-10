@@ -47,7 +47,7 @@ void Unit::showHealth() {
             _coordinates.x * TILE_SIZE,
             _coordinates.y * TILE_SIZE,
             TILE_SIZE,
-            TILE_SIZE*0.2
+            static_cast<int>(TILE_SIZE*0.2)
     };
 
     SDL_SetRenderDrawColor(_renderer, 0,0,0,1);
@@ -56,8 +56,8 @@ void Unit::showHealth() {
     SDL_Rect bar = {
         _coordinates.x * TILE_SIZE +2,
         _coordinates.y * TILE_SIZE +2,
-        TILE_SIZE*((float)getHp()/(float)getMaxHp()) - 4,
-        TILE_SIZE * 0.2 - 4
+        static_cast<int>(TILE_SIZE*((float)getHp()/(float)getMaxHp()) - 4),
+        static_cast<int>(TILE_SIZE * 0.2 - 4)
     };
 
     SDL_SetRenderDrawColor(_renderer, 0, 255, 0, 1);
@@ -188,7 +188,7 @@ void Unit::attack(Unit &other) {
         return;
     }
 
-    other.counterAttack(*this);
+    other.counterAttack(other);
 
 
 }

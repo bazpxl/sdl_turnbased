@@ -280,7 +280,7 @@ void WarState::initBuildingMap() {
 
         buildingMap.resize(numRows);
         for (auto &row: buildingMap) {
-            row.resize(numCols, nullptr);
+            row.resize(numCols);
         }
     }
     buildingMap.reserve(map.capacity());
@@ -463,9 +463,9 @@ void WarState::initMap() {
         for (size_t x = 0; x < map[0][0].size(); x++) {
             auto tileType = ms.getTileType({static_cast<int>(x), static_cast<int>(y)});
             if (tileType == TileType::HQ || tileType == TileType::CITY || tileType == TileType::AIRPORT ||
-                tileType == TileType::PORT) {
+                tileType == TileType::PORT || tileType == TileType::FACTORY) {
                 buildingMap[y][x] = BuildingFactory::createBuilding(tileType, map[1][y][x],
-                                                                    {static_cast<int>(x), static_cast<int>(y)}).get();
+                                                                    {static_cast<int>(x), static_cast<int>(y)});
             }
         }
     }

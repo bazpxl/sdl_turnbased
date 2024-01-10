@@ -59,8 +59,6 @@ Building::Building(int tileIndex, TileType type, SDL_Point coordinates) {
     _coordinates = coordinates;
     _capturing = nullptr;
     _team = BuildingIndexToTeam(tileIndex);
-
-
 }
 
 std::unique_ptr<Building> BuildingFactory::createBuilding(TileType type, int tileIndex, SDL_Point coordinates) {
