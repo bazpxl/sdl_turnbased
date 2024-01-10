@@ -47,7 +47,7 @@ public:
     Player *currentPlayer;
     std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
-    std::vector<std::vector<Building*>> buildingMap;
+    std::vector<std::vector<std::unique_ptr<Building>>> buildingMap;
 	std::vector<SDL_Texture*>_panelFontTextures;
 	std::vector<SDL_Texture*>_panelTextures;
     SDL_Texture *texture;
@@ -140,9 +140,9 @@ public:
 
     void drawTile(SDL_Renderer* renderer, SDL_Texture* tilesetTexture, int tileIndex, SDL_Rect& destRect, int imgSizeX, int tileSize, int w);
 
-    void renderTileset(SDL_Renderer* renderer, SDL_Texture* tileset, TTF_Font* font, SDL_Point imgSize, int tileSize);
+    static void renderTileset(SDL_Renderer* renderer, SDL_Texture* tileset, TTF_Font* font, SDL_Point imgSize, int tileSize);
 
-    void mapToCsv(const std::vector<std::vector<int>> map, const string& filename);
+    static void mapToCsv(const std::vector<std::vector<int>> map, const string& filename);
 
     std::vector<std::vector<int>> csvToMap(const string& filename);
     int selected = 0;
