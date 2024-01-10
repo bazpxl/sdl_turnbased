@@ -1,5 +1,5 @@
 #include "Building.h"
-#include <iostream>
+
 int BuildingIndexToTeam(int index) {
     auto buildingIndex = static_cast<BuildingIndex>(index);
     switch (buildingIndex) {

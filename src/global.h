@@ -1,4 +1,3 @@
-
 #pragma once
 
 #define _GLIBC_USE_DEPRECATED 0
@@ -48,6 +47,8 @@
 #else
 #include <SDL_opengl.h>
 #endif
+
+#define TILE_SIZE 64
 
 using i8    = std::int8_t;
 using i16   = std::int16_t;
@@ -124,7 +125,7 @@ using fmt::print, fmt::println, fmt::format;
 #define BasePath "../../"          // Pfad für Apple-Geräte
 #else
 // Definitionen für andere Compiler und Systeme
-#define BasePath "../../"    // Standard-Definition für andere Systeme
+#define BasePath "../../../../"    // Standard-Definition für andere Systeme
 #endif
 #endif
 

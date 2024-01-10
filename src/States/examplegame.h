@@ -15,10 +15,12 @@
 #include "Map/Paths.h"
 #include "Units/CombatCalculator.h"
 #include "Buildings/Building.h"
+#include "UI/ActionMenu.h"
 
 
 class ExampleGame;
 
+class MapState;
 class WarState;
 class ShopState;
 class Player;
@@ -43,9 +45,11 @@ public:
 	TTF_Font *_indexFont;
     Paths* paths;
     inline static Player *currentPlayer = nullptr;
+    ActionMenu actionMenu;
+
     std::vector<Player*>players;
     std::vector<std::vector<std::vector<int>>> map;
-    std::vector<std::vector<Building*>> buildingMap;
+    std::vector<std::vector<std::unique_ptr<Building>>> buildingMap;
 	std::vector<SDL_Texture*>_panelFontTextures;
 	std::vector<SDL_Texture*>_panelTextures;
     SDL_Texture *texture;
@@ -57,7 +61,9 @@ public:
 
     std::unordered_map<SDL_Point, int, Paths::SDLPointHash, Paths::SDLPointEqual> attackRadius;
     CombatCalculator * cc;
-    bool initialisiert = 0;
+
+    bool initialisiert = false;
+
     Unit *selected = nullptr;
     bool mouseDown = false;
     bool sameClick = true;
@@ -99,7 +105,7 @@ public:
 
     // Drawing
 
-    void drawTile(int tileIndex, SDL_Rect &destRect,int imgSizeX,int tileSize = 16);
+    void drawTile(int tileIndex, SDL_Rect &destRect,int imgSizeX,int tileSizeInTileset = 16);
 
     void renderTileset(TTF_Font *font, SDL_Point imgSize, int tileSize = 16);
 
@@ -153,11 +159,39 @@ public:
 
     char textBuffer[250];
     using ExampleGameState::ExampleGameState;
-    
+
     void Init() override;
     void UnInit() override;
 
     bool HandleEvent(const Event& event) override;
     void Update(const u32 frame, const u32 totalMSec, const float deltaT) override;
     void Render(const u32 frame, const u32 totalMSec, const float deltaT) override;
+};
+
+class MapState : public ExampleGameState
+{
+public:
+    // ctor
+    using ExampleGameState::ExampleGameState;
+
+    std::vector<std::vector<std::vector<int>>> Map;
+    SDL_Texture* texture;
+
+    void drawTile(SDL_Renderer* renderer, SDL_Texture* tilesetTexture, int tileIndex, SDL_Rect& destRect, int imgSizeX, int tileSize, int w);
+
+    static void renderTileset(SDL_Renderer* renderer, SDL_Texture* tileset, TTF_Font* font, SDL_Point imgSize, int tileSize);
+
+    static void mapToCsv(const std::vector<std::vector<int>> map, const string& filename);
+
+    std::vector<std::vector<int>> csvToMap(const string& filename);
+    int selected = 0;
+    int currentLayer = 0;
+    void Init() override;
+    void UnInit() override;
+
+    bool HandleEvent(const Event& event) override;
+    void Update(const u32 frame, const u32 totalMSec, const float deltaT) override;
+    void Render(const u32 frame, const u32 totalMSec, const float deltaT) override;
+
+    Color GetClearColor() const override { return Color{ 0, 0, 0, SDL_ALPHA_OPAQUE }; }
 };

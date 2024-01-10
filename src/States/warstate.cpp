@@ -1,13 +1,7 @@
 #include "examplegame.h"
+#include "UI/Buttons.h"
 
-TTF_Font *indexFont;
-
-std::unique_ptr<Unit> infantryUnit;
-std::unique_ptr<Unit> mechUnit;
-std::unique_ptr<Unit> infantryUnit2;
-
-
-std::vector<std::unique_ptr<Unit>> infantryUnits;
+Button *b;
 bool operator==(const SDL_Point &lhs, const SDL_Point &rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
@@ -17,12 +11,10 @@ bool operator!=(const SDL_Point &lhs, const SDL_Point &rhs) {
 }
 
 void WarState::Init() {
-
     RS::getInstance().init(renderer);
 
-
     // all map initializations
-    if (initialisiert == 0) {
+    if (initialisiert == false) {
         initMap();
     }
 
@@ -32,48 +24,46 @@ void WarState::Init() {
 
     paths = new Paths(map, MapStats::getInstance(&map, &unitMap));
     cc = new CombatCalculator(MapStats::getInstance(&map, &unitMap));
+    Unit::setCombatCalculator(cc);
 
     loadTileset("asset/graphic/NewTiles.png");
 
-
-    // Kann ggf weg
-    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
-
-    //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 2, 9, 2));
-    //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 1, 8, 2));
-    //	infantryUnits.push_back(UnitFactory::createUnit(UnitType::INFANTRY, 13, 2, 1));
-    //    unitMap[2][13] = infantryUnits[0].get();
-    //    unitMap[9][2] = infantryUnits[1].get();
-    //    unitMap[8][1] = infantryUnits[2].get();
     if (initialisiert == 0) {
         players.push_back(new Player(20, 20, 4, 1));
         players.push_back(new Player(20, 20, 4, 2));
         currentPlayer = players[0];
         initialisiert = 1;
 
-    }   
-    _panelTextures.push_back(IMG_LoadTexture(renderer, BasePath"asset/graphic/panel_beigeLight.png"));
-    if (!_panelTextures[0]) {
-        std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
     }
-    _panelTextures.push_back((IMG_LoadTexture(renderer, BasePath"asset/graphic/coin.png")));
-    if (!_panelTextures[1]) {
-        std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
-    }
-    _indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
-    SDL_Surface* textSurface = TTF_RenderText_Solid(_indexFont, "def 0", { 0, 0, 0 });
-    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
-    textSurface = TTF_RenderText_Solid(_indexFont, "def 1", { 0, 0, 0 });
-    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
-    textSurface = TTF_RenderText_Solid(_indexFont, "def 2", { 0, 0, 0 });
-    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
-    textSurface = TTF_RenderText_Solid(_indexFont, "def 3", { 0, 0, 0 });
-    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
-    textSurface = TTF_RenderText_Solid(_indexFont, "def 4", { 0, 0, 0 });
-    _panelFontTextures.push_back(SDL_CreateTextureFromSurface(renderer, textSurface));
 
-    SDL_FreeSurface(textSurface);
+    // Kann ggf weg
+    indexFont = TTF_OpenFont(BasePath "asset/font/MonkeyIsland-1991-refined.ttf", 10);
 
+
+	_panelTextures.push_back(IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png"));
+	if (!_panelTextures[0]) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
+	_panelTextures.push_back((IMG_LoadTexture(renderer, BasePath"asset/graphic/coin.png")));
+	if (!_panelTextures[1]) {
+		std::cerr << "Fehler beim Laden der Textur: " << SDL_GetError() << std::endl;
+	}
+
+    _indexFont = TTF_OpenFont(BasePath "asset/font/kenvector_future_thin.ttf", 100);
+
+	SDL_Surface* textSurface = TTF_RenderText_Solid( _indexFont, "def 0", { 0, 0, 0, 255});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 1", { 0, 0, 0, 255});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 2", { 0, 0, 0, 255});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 3", { 0, 0, 0, 255});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0, 255});
+	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
+
+	SDL_FreeSurface(textSurface);
+    actionMenu = ActionMenu(_indexFont);
 }
 
 void WarState::UnInit() {
@@ -88,32 +78,11 @@ void WarState::UnInit() {
     TTF_CloseFont(_indexFont);
 }
 
-void WarState::endRound(){
-	// Reset actions for all units
-	//----------------------------------------------
-	for (auto &row: unitMap) {
-		for (auto &unit: row) {
-			if (unit != nullptr) {
-				unit->setFinishedTurn(false);
-				unit->setHasAttacked(false);
-				unit->setHasMoved(false);
-			}
-		}
-	}
 
-	// set currentPlayer pointer
-	//-------------------------------------------------
-	nextPlayer();
-
-
-	// set income calculation based on house count
-	int actualVal = currentPlayer->getCurrency();
-	currentPlayer->setCurrency(actualVal + 20 * currentPlayer->getActiveHouses());
-
-}
 
 bool WarState::HandleEvent(const Event &event) {
     updateMouseIndex(event);
+
     if (WarState::shopUnit == 0)
     {
         if (isLeftMouseButtonDown(event)) {
@@ -133,7 +102,11 @@ bool WarState::HandleEvent(const Event &event) {
             handleLeftMouseButtonUp();
         }
 
-        processUnitSelectionAndMovement(event);
+
+        if (actionMenu._isVisible) {
+            actionMenu.handleEvent(event);
+            return false;
+        }
 
 
 	    // End Current Round
@@ -143,8 +116,12 @@ bool WarState::HandleEvent(const Event &event) {
 		    if(what_key.scancode == SDL_SCANCODE_SPACE)
 			    endRound();
 	    }
+        processUnitSelectionAndMovement(event);
     }
-    setBoughtUnit(event);
+    else{
+        setBoughtUnit(event);
+    }
+
     return false;
 }
 
@@ -165,12 +142,42 @@ void WarState::Render(const u32 frame, const u32 totalMSec, const float deltaT) 
     drawUnits();
 
 	drawInterface();
+
+    if (actionMenu._isVisible) {
+        actionMenu.drawUI();
+    }
+    //b->render();
+    //actionMenu.Test();
 }
 
 /* ##############################################
  * ##  FUNCTIONS CLEANUP                       ##
  * ##############################################
  * */
+
+void WarState::endRound(){
+    // Reset actions for all units
+    //----------------------------------------------
+    for (auto &row: unitMap) {
+        for (auto &unit: row) {
+            if (unit != nullptr) {
+                unit->setFinishedTurn(false);
+                unit->setHasAttacked(false);
+                unit->setHasMoved(false);
+            }
+        }
+    }
+
+    // set currentPlayer pointer
+    //-------------------------------------------------
+    nextPlayer();
+
+
+    // set income calculation based on house count
+    int actualVal = currentPlayer->getCurrency();
+    currentPlayer->setCurrency(actualVal + 1000 * currentPlayer->getActiveHouses());
+
+}
 
 std::vector<std::vector<int>> WarState::csvToMap(const string &filename) {
     std::vector<std::vector<int>> map;
@@ -198,15 +205,15 @@ void WarState::renderTileset(TTF_Font *font, SDL_Point imgSize, int tileSize) {
     int tilesPerRow = imgSize.x / tileSize;
     int tilesPerColumn = imgSize.y / tileSize;
     srcRect.w = srcRect.h = tileSize;
-    destRect.w = destRect.h = tileSize * 2;
+    destRect.w = destRect.h = TILE_SIZE;
 
     for (int y = 0; y < tilesPerColumn; ++y) {
         for (int x = 0; x < tilesPerRow; ++x) {
             srcRect.x = x * tileSize;
             srcRect.y = y * tileSize;
 
-            destRect.x = x * tileSize * 2;
-            destRect.y = y * tileSize * 2;
+            destRect.x = x * TILE_SIZE;
+            destRect.y = y * TILE_SIZE;
 
             SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
 
@@ -225,15 +232,15 @@ void WarState::renderTileset(TTF_Font *font, SDL_Point imgSize, int tileSize) {
 }
 
 
-void WarState::drawTile(int tileIndex, SDL_Rect &destRect, int imgSizeX, int tileSize) {
-    int tilesPerRow = imgSizeX / tileSize;
+void WarState::drawTile(int tileIndex, SDL_Rect &destRect, int imgSizeX, int tileSizeInTileset) {
+    int tilesPerRow = imgSizeX / tileSizeInTileset;
 
     SDL_Rect srcRect;
-    srcRect.w = srcRect.h = tileSize;
-    srcRect.x = (tileIndex % tilesPerRow) * tileSize;
-    srcRect.y = (tileIndex / tilesPerRow) * tileSize;
+    srcRect.w = srcRect.h = tileSizeInTileset;
+    srcRect.x = (tileIndex % tilesPerRow) * tileSizeInTileset;
+    srcRect.y = (tileIndex / tilesPerRow) * tileSizeInTileset;
 
-    destRect.w = destRect.h = 32;
+    destRect.w = destRect.h = TILE_SIZE;
 
     SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
 }
@@ -243,8 +250,8 @@ void WarState::drawMap() {
     for (auto &layer: map) {
         for (size_t j = 0; j < layer.size(); j++) {
             for (size_t k = 0; k < layer[j].size(); k++) {
-                destRect.x = int(k) * 32;
-                destRect.y = int(j) * 32;
+                destRect.x = int(k) * TILE_SIZE;
+                destRect.y = int(j) * TILE_SIZE;
                 drawTile(layer[j][k], destRect, 512);
             }
         }
@@ -256,6 +263,8 @@ void WarState::drawUnits() {
         for (auto &unit: row) {
             if (unit != nullptr) {
                 unit->draw();
+                if (unit->getTeam() == currentPlayer->getTeam())
+                    unit->showHealth();
             }
         }
     }
@@ -293,7 +302,7 @@ void WarState::initBuildingMap() {
 
         buildingMap.resize(numRows);
         for (auto &row: buildingMap) {
-            row.resize(numCols, nullptr);
+            row.resize(numCols);
         }
     }
     buildingMap.reserve(map.capacity());
@@ -301,8 +310,8 @@ void WarState::initBuildingMap() {
 
 void WarState::updateMouseIndex(const Event &event) {
     if (event.type == SDL_MOUSEMOTION) {
-        mouseIndex.x = event.motion.x / 32;
-        mouseIndex.y = event.motion.y / 32;
+        mouseIndex.x = event.motion.x / TILE_SIZE;
+        mouseIndex.y = event.motion.y / TILE_SIZE;
     }
 }
 
@@ -350,9 +359,9 @@ void WarState::getFactory(const Event& event)
     Building* factory;
 
     auto ms = MapStats::getInstance(&map, &unitMap);
-    
+
     auto tileType = ms.getTileType({ mouseIndex.x, mouseIndex.y });
-    
+
     if (tileType == TileType::FACTORY) {
         factory = buildingMap[mouseIndex.y][mouseIndex.x];
         if (factory->getTeam() == currentPlayer->getTeam())
@@ -410,11 +419,14 @@ void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
         if (!sameClick && isLeftMouseButtonDown(event) && paths->mouseInRadius(mouseIndex, radius) &&
             mouseIndex != selected->getCoordinates()) {
+
             unitMap[selected->getCoordinates().y][selected->getCoordinates().x] = nullptr;
             unitMap[mouseIndex.y][mouseIndex.x] = selected;
             selected->setCoordinates(mouseIndex.x, mouseIndex.y);
-            selected->setHasMoved(true);
+            actionMenu.generateOptions(selected, unitMap);
+            actionMenu._isVisible = true;
             sameClick = true;
+
             clearSelectionAndPath();
         } else if (isLeftMouseButtonDown(event) && !paths->mouseInRadius(mouseIndex, radius)) {
             clearSelectionAndPath();
@@ -444,17 +456,17 @@ void WarState::drawInterface()
 			const SDL_Point & winSize = game.GetWindowSize();
 
 			// draw right panel for playerinfo
-			SDL_Rect destRect = { winSize.x / 32, winSize.y - 32, winSize.x, 32 };
+			SDL_Rect destRect = { winSize.x / TILE_SIZE, winSize.y - TILE_SIZE, winSize.x, TILE_SIZE };
 			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
 			// draw left panel for tileinfo
-			destRect = { 0, winSize.y - 32, 50, 32 };
+			destRect = { 0, winSize.y - TILE_SIZE, 50, TILE_SIZE };
 			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
 
 			// get defense value
 			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( {mouseIndex.x, mouseIndex.y} );
 
 			// render tile
-			destRect = { 6, winSize.y - 32, 32, 32 };
+			destRect = { 6, winSize.y - TILE_SIZE, TILE_SIZE, TILE_SIZE };
 			if( map[1][mouseIndex.y][mouseIndex.x] >= 0 ){
 				drawTile( map[1][mouseIndex.y][mouseIndex.x], destRect, 512 );
 			}
@@ -464,7 +476,7 @@ void WarState::drawInterface()
 
 			// render defense value
 			// -------------------------------------------------------------
-			destRect.x += 37;
+			destRect.x += TILE_SIZE + 5;
 			SDL_RenderCopy( renderer, _panelFontTextures[defense], EntireRect, &destRect );
 
 			// Set render-color for team-emblem
@@ -483,16 +495,16 @@ void WarState::drawInterface()
 
 			// Render Coin
 			// --------------------------------------------------------------
-			destRect = { winSize.x - 96, winSize.y - 26, 32, 32 };
+			destRect = { winSize.x - TILE_SIZE * 3, winSize.y - TILE_SIZE -5, TILE_SIZE, TILE_SIZE };
 			SDL_RenderCopy( renderer, _panelTextures[1], EntireRect, &destRect );
 
 			// Create TTF-font surface and render currency-val
 			// ---------------------------------------------------------------
 			std::string currency = std::to_string( currentPlayer->getCurrency() );
-			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 } );
+			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 ,255} );
 			SDL_Texture * curTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
 
-			destRect = { winSize.x - 74, winSize.y - 32, 32, 32 };
+			destRect = { winSize.x - TILE_SIZE + 20, winSize.y - TILE_SIZE, TILE_SIZE, TILE_SIZE };
 			SDL_RenderCopy( renderer, curTexture, EntireRect, &destRect );
 
 			SDL_FreeSurface( textSurface );
@@ -505,12 +517,13 @@ void WarState::drawInterface()
 void WarState::initMap() {
     map.push_back(csvToMap(BasePath "asset/map/pvp/bg.csv"));
     map.push_back(csvToMap(BasePath"asset/map/pvp/map.csv"));
+
     initUnitMap();
     loadUnitMap();
 
     // bMap is already initialized as map
     initBuildingMap();
-    
+
     auto ms = MapStats::getInstance(&map, &unitMap);
 
     for (size_t y = 0; y < map[0].size(); y++) {
@@ -519,7 +532,7 @@ void WarState::initMap() {
             if (tileType == TileType::HQ || tileType == TileType::CITY || tileType == TileType::AIRPORT ||
                 tileType == TileType::PORT || tileType == TileType::FACTORY) {
                 buildingMap[y][x] = BuildingFactory::createBuilding(tileType, map[1][y][x],
-                                                                    {static_cast<int>(x), static_cast<int>(y)}).get();
+                                                                    {static_cast<int>(x), static_cast<int>(y)});
             }
         }
     }

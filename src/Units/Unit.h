@@ -4,12 +4,15 @@
 #include "global.h"
 #include "Helper/render_singleton.h"
 #include "Helper/enums.h"
+#include "CombatCalculator.h"
 
+class CombatCalculator;
 
 class Unit {
 protected:
     static SDL_Texture *_texture;
     static std::vector<std::vector<Unit*>> *_unitMap;
+    static CombatCalculator *_cc;
     const UnitType _type;
     const MovementType _movementType;
     SDL_Point _coordinates; // Index Position
@@ -40,12 +43,18 @@ public:
 
 
     virtual ~Unit() = default;
-
+    virtual void showHealth();
     virtual void draw();
+
+    std::string getTypeName() const;
 
     static void setTexture(SDL_Texture *texture);
 
     static void setUnitMap(std::vector<std::vector<Unit*>> *unitMap);
+
+    static void setCombatCalculator(CombatCalculator *cc);
+
+    virtual void attack(Unit &other);
 
     // TODO: Implement specialMove
     //virtual void specialMove() = 0;
@@ -95,6 +104,7 @@ public:
     void setDirection(SDL_RendererFlip direction);
 
 
+    void counterAttack(Unit &other);
 };
 
 class UnitFactory {
