@@ -54,6 +54,8 @@ void WarState::Init() {
 	textSurface = TTF_RenderText_Solid( _indexFont, "def 4", { 0, 0, 0, 255});
 	_panelFontTextures.push_back( SDL_CreateTextureFromSurface( renderer, textSurface));
 
+
+
 	SDL_FreeSurface(textSurface);
     actionMenu = ActionMenu(_indexFont);
 }
@@ -301,6 +303,16 @@ bool WarState::isLeftMouseButtonUp(const Event &event) {
     return event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT;
 }
 
+bool WarState::isRightMouseButtonDown( const Event & event )
+{
+	return event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT;
+}
+
+bool WarState::isRightMouseButtonUp( const Event & event )
+{
+	return event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_RIGHT;
+}
+
 void WarState::handleLeftMouseButtonDown() {
     mouseDown = true;
 }
@@ -309,6 +321,12 @@ void WarState::handleLeftMouseButtonUp() {
     mouseDown = false;
     sameClick = false;
 }
+
+void WarState::handleRightMouseButtonDown()
+{
+
+}
+
 
 void WarState::clearSelectionAndPath() {
     path.clear();
@@ -390,11 +408,11 @@ void WarState::drawInterface()
 			const SDL_Point & winSize = game.GetWindowSize();
 
 			// draw right panel for playerinfo
-			SDL_Rect destRect = { winSize.x / TILE_SIZE, winSize.y - TILE_SIZE, winSize.x, TILE_SIZE };
+			SDL_Rect destRect = { 0, winSize.y - TILE_SIZE, winSize.x, TILE_SIZE };
 			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
-			// draw left panel for tileinfo
-			destRect = { 0, winSize.y - TILE_SIZE, 50, TILE_SIZE };
-			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
+//			// draw left panel for tileinfo
+//			destRect = { 0, winSize.y - TILE_SIZE, 50, TILE_SIZE };
+//			SDL_RenderCopy( renderer, _panelTextures[0], EntireRect, &destRect );
 
 			// get defense value
 			int defense = MapStats::getInstance( &map, &unitMap ).getDefense( {mouseIndex.x, mouseIndex.y} );
@@ -424,12 +442,12 @@ void WarState::drawInterface()
 
 			// Render team-emblem
 			// --------------------------------------------------------------
-			SDL_Rect emblemRect = { winSize.x - 35, winSize.y - 28, 27, 27 };
+			SDL_Rect emblemRect = { winSize.x - TILE_SIZE, winSize.y - TILE_SIZE/2-15, TILE_SIZE/2, TILE_SIZE/2 };
 			SDL_RenderFillRect( renderer, &emblemRect );
 
 			// Render Coin
 			// --------------------------------------------------------------
-			destRect = { winSize.x - TILE_SIZE * 3, winSize.y - TILE_SIZE -5, TILE_SIZE, TILE_SIZE };
+			destRect = { winSize.x - TILE_SIZE * 3+5, winSize.y - TILE_SIZE+10, TILE_SIZE, TILE_SIZE };
 			SDL_RenderCopy( renderer, _panelTextures[1], EntireRect, &destRect );
 
 			// Create TTF-font surface and render currency-val
@@ -438,11 +456,12 @@ void WarState::drawInterface()
 			SDL_Surface * textSurface = TTF_RenderText_Solid( _indexFont, currency.c_str(), { 0, 0, 0 ,255} );
 			SDL_Texture * curTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
 
-			destRect = { winSize.x - TILE_SIZE + 20, winSize.y - TILE_SIZE, TILE_SIZE, TILE_SIZE };
+			destRect = { winSize.x - TILE_SIZE*2-15, winSize.y - TILE_SIZE, TILE_SIZE, TILE_SIZE };
 			SDL_RenderCopy( renderer, curTexture, EntireRect, &destRect );
 
 			SDL_FreeSurface( textSurface );
 			SDL_DestroyTexture( curTexture );
+			
 
 			//--------------------------------------------------------------------
 		}

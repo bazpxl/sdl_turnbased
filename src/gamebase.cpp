@@ -140,6 +140,7 @@ void Game::Render( const u64 msSinceStart, const float deltaTNeeded )
 	)
 
 	SDL_RenderPresent( renderer );
+
 }
 
 // Returns if the event has been handled

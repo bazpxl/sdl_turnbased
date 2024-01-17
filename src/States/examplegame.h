@@ -112,12 +112,15 @@ public:
     void updateMouseIndex(const Event &event);
 
     static bool isLeftMouseButtonDown(const Event &event);
-
     static bool isLeftMouseButtonUp(const Event &event);
 
-    void handleLeftMouseButtonDown();
+	static bool isRightMouseButtonDown(const Event &event);
+	static bool isRightMouseButtonUp(const Event &event);
 
+	void handleLeftMouseButtonDown();
     void handleLeftMouseButtonUp();
+
+	void handleRightMouseButtonDown();
 
     void clearSelectionAndPath();
 
