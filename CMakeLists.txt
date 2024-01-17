@@ -191,7 +191,20 @@ add_executable( sdl_basegame
         src/States/examplegame.h
         src/States/examplegame.cpp
         src/Units/Unit.cpp
-        src/Units/Unit.h src/States/warstate.cpp src/Helper/render_singleton.cpp src/Helper/render_singleton.h src/Map/Tile.cpp src/Map/Tile.h src/Map/Tile.h src/Map/Tile.cpp src/Helper/map_stat_helper.cpp src/Helper/map_stat_helper.h src/Helper/enums.h src/UI/Cursor.cpp src/UI/Cursor.h src/UI/Cursor.h src/UI/Cursor.cpp src/Map/Paths.cpp src/Map/Paths.h src/Map/Paths.h
+        src/Units/Unit.h
+        src/States/warstate.cpp
+        src/Helper/render_singleton.cpp
+        src/Helper/render_singleton.h
+        src/Map/Tile.cpp
+        src/Map/Tile.h
+        src/Helper/map_stat_helper.cpp
+        src/Helper/map_stat_helper.h
+        src/Helper/enums.h
+        src/UI/Cursor.cpp
+        src/UI/Cursor.h
+        src/Map/Paths.cpp
+        src/Map/Paths.h
+        src/States/ShopState.cpp
         src/States/turns.cpp
         src/States/turns.h
         src/States/turns.h

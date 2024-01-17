@@ -31,13 +31,10 @@ ExampleGame::ExampleGame()
         : Game("Warcrimes",getGameDimensions(BasePath "asset/map/pvp/bg.csv"), false) {
     // Will be freed in Game dtor
     allStates = {
-            new WarState(*this, renderer),
+            new WarState    (*this, renderer),
+            new ShopState	(*this, renderer),
             new MapState(*this, renderer)
-
     };
-
-
-
 
     // The virtual call is ok here
     SetNextState(0);
@@ -60,10 +57,15 @@ bool ExampleGame::HandleEvent(const Event &event) {
                 SetNextState(0);
                 return true;
             }
-            else if (what_key.scancode == SDL_SCANCODE_2) {
+			else if (what_key.scancode == SDL_SCANCODE_2)
+			{
+				SetNextState(1);
+				return true;
+			}
+            else if (what_key.scancode == SDL_SCANCODE_3) {
                 // Both Game and GameState can change the State,
                 // but it will only be changed after the current frame
-                SetNextState(1);
+                SetNextState(2);
                 return true;
             }
             break;

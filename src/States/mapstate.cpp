@@ -59,8 +59,8 @@ void MapState::mapToCsv(const std::vector<std::vector<int>> map, const string& f
     std::ofstream file;
     file.open(filename);
 
-    for (int x = 0; x < map.size(); x++) {
-        for (int y = 0; y < map[0].size(); y++) {
+    for (size_t x = 0; x < map.size(); x++) {
+        for (size_t y = 0; y < map[0].size(); y++) {
             if (map[0].size() - 1 == y)
                 file << map[x][y] << "\n";
             else
@@ -75,7 +75,7 @@ std::vector<std::vector<int>> MapState::csvToMap(const string& filename) {
     std::vector<std::vector<int>> map;
     std::ifstream file(filename);
     if (!file) {
-        std::cerr << "Fehler beim Öffnen der Datei: " << filename << std::endl;
+        std::cerr << "Fehler beim offnen der Datei: " << filename << std::endl;
         return map;
     }
     std::string line;

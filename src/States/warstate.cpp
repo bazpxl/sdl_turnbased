@@ -14,8 +14,9 @@ void WarState::Init() {
     RS::getInstance().init(renderer);
 
     // all map initializations
-    initMap();
-
+    if (initialisiert == false) {
+        initMap();
+    }
 
 
 
@@ -27,10 +28,14 @@ void WarState::Init() {
 
     loadTileset("asset/graphic/NewTiles.png");
 
+    if (initialisiert == 0) {
+        players.push_back(new Player(20, 20, 4, 1));
+        players.push_back(new Player(20, 20, 4, 2));
+        currentPlayer = players[0];
+        initialisiert = 1;
 
-	players.push_back(new Player(20,20,4,1));
-	players.push_back(new Player(20,20,4,2));
-	currentPlayer = players[0];
+    }
+
 
 	_panelTextures.push_back(IMG_LoadTexture( renderer, BasePath"asset/graphic/panel_beigeLight.png"));
 	if (!_panelTextures[0]) {
@@ -77,30 +82,44 @@ void WarState::UnInit() {
 bool WarState::HandleEvent(const Event &event) {
     updateMouseIndex(event);
 
+    if (WarState::shopUnit == 0)
+    {
+        if (isLeftMouseButtonDown(event)) {
+            handleLeftMouseButtonDown();
+        }
 
-    if (isLeftMouseButtonDown(event)) {
-        handleLeftMouseButtonDown();
+        if (event.type == SDL_KEYDOWN && event.button.button == SDL_SCANCODE_S) {
+            game.SetNextState(1);
+        }
+
+        if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+        {
+            getFactory(event);
+        }
+
+        if (isLeftMouseButtonUp(event)) {
+            handleLeftMouseButtonUp();
+        }
+
+
+        if (actionMenu._isVisible) {
+            actionMenu.handleEvent(event);
+            return false;
+        }
+
+
+	    // End Current Round
+	    // --------------------------------------------------------------------
+	    if (event.type == SDL_KEYDOWN){
+		    const Keysym &what_key = event.key.keysym;
+		    if(what_key.scancode == SDL_SCANCODE_SPACE)
+			    endRound();
+	    }
+        processUnitSelectionAndMovement(event);
     }
-
-    if (isLeftMouseButtonUp(event)) {
-        handleLeftMouseButtonUp();
+    else{
+        setBoughtUnit(event);
     }
-
-    if (actionMenu._isVisible) {
-        actionMenu.handleEvent(event);
-        return false;
-    }
-
-    if (event.type == SDL_KEYDOWN){
-        const Keysym &what_key = event.key.keysym;
-        if(what_key.scancode == SDL_SCANCODE_SPACE)
-            endRound();
-    }
-
-
-
-    processUnitSelectionAndMovement(event);
-
 
     return false;
 }
@@ -282,7 +301,7 @@ void WarState::initBuildingMap() {
 
         buildingMap.resize(numRows);
         for (auto &row: buildingMap) {
-            row.resize(numCols, nullptr);
+            row.resize(numCols);
         }
     }
     buildingMap.reserve(map.capacity());
@@ -349,6 +368,50 @@ void WarState::processUnitSelectionAndMovement(const Event &event) {
         clearSelectionAndPath();
     }
 }
+
+void WarState::getFactory(const Event& event)
+{
+    Building* factory;
+
+    auto ms = MapStats::getInstance(&map, &unitMap);
+
+    auto tileType = ms.getTileType({ mouseIndex.x, mouseIndex.y });
+
+    if (tileType == TileType::FACTORY) {
+        factory = buildingMap[mouseIndex.y][mouseIndex.x].get();
+        if (factory->getTeam() == currentPlayer->getTeam())
+        {
+            mousePositionShop = { mouseIndex.x, mouseIndex.y };
+            game.SetNextState(1);
+        }
+    }
+}
+
+void WarState::setBoughtUnit(const Event& event) {
+    if (WarState::shopUnit > 0)
+    {
+        if (event.type == SDL_KEYDOWN && event.button.button == SDL_SCANCODE_ESCAPE)
+        {
+            WarState::shopUnit = 0;
+            return;
+        }
+        if (isLeftMouseButtonDown(event))
+        {
+            if (((mouseIndex.x == mousePositionShop.x-1 || mouseIndex.x == mousePositionShop.x + 1) && mouseIndex.y == mousePositionShop.y) ||
+                ((mouseIndex.y == mousePositionShop.y-1 || mouseIndex.y == mousePositionShop.y + 1) && mouseIndex.x == mousePositionShop.x))
+            {
+                auto type = static_cast<UnitType>(WarState::shopUnit-1);
+                auto unit = UnitFactory::createUnit(type, mouseIndex.x, mouseIndex.y, currentPlayer->getTeam());
+                int unitCost = unit->getPrice();
+                units.push_back(std::move(unit));
+                unitMap[mouseIndex.y][mouseIndex.x] = units.back().get();
+                currentPlayer->setCurrency(currentPlayer->getCurrency()- unitCost);
+                WarState::shopUnit = 0;
+            }
+        }
+    }
+};
+
 
 void WarState::handleUnitInteraction(Unit *unit, const Event &event) {
 
@@ -473,6 +536,7 @@ void WarState::initMap() {
 
     initUnitMap();
     loadUnitMap();
+
     // bMap is already initialized as map
     initBuildingMap();
 
@@ -482,13 +546,12 @@ void WarState::initMap() {
         for (size_t x = 0; x < map[0][0].size(); x++) {
             auto tileType = ms.getTileType({static_cast<int>(x), static_cast<int>(y)});
             if (tileType == TileType::HQ || tileType == TileType::CITY || tileType == TileType::AIRPORT ||
-                tileType == TileType::PORT) {
+                tileType == TileType::PORT || tileType == TileType::FACTORY) {
                 buildingMap[y][x] = BuildingFactory::createBuilding(tileType, map[1][y][x],
-                                                                    {static_cast<int>(x), static_cast<int>(y)}).get();
+                                                                    {static_cast<int>(x), static_cast<int>(y)});
             }
         }
     }
-
 }
 
 void WarState::loadUnitMap() {
@@ -522,7 +585,6 @@ void WarState::loadUnitMap() {
     }
 
     file.close();
-
 }
 
 void WarState::saveUnitMap() {
