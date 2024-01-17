@@ -68,13 +68,13 @@ void WarState::Init() {
 void WarState::UnInit() {
     delete (paths);
     SDL_DestroyTexture(texture);
-	for(auto txt : _panelFontTextures){
-		SDL_DestroyTexture(txt);
-	}
-	for(auto txt: _panelTextures){
-		SDL_DestroyTexture(txt);
-	}
-    TTF_CloseFont(_indexFont);
+//	for(auto txt : _panelFontTextures){
+//		SDL_DestroyTexture(txt);
+//	}
+//	for(auto txt: _panelTextures){
+//		SDL_DestroyTexture(txt);
+//	}
+//    TTF_CloseFont(_indexFont);
 }
 
 
